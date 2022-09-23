@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" style="font-family:Arial">
+  <head>
+    <!-- title displayed on browser tab -->
+    <title>My experiment</title>
+    <meta charset="UTF-8">
+
+    <!-- load base jspsych and css style sheet -->
+    <script src="jspsych/jspsych.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+
+    <!-- load selected plugins/libraries -->
+    <script src="lib/papaparse.min.js"></script>
+    <script src="lib/utils.js"></script>
+    <script src="lib/instruction_engine.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="jspsych/plugin-external-html.js"></script>
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-image-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+    <script src="jspsych/plugin-call-function.js"></script>
+    <script src="jspsych/plugin-instructions.js"></script>
+    <script src="tasks/two-arm-new/lib/exp-html.js"></script>
+    <link href="tasks/two-arm-new/lib/exp-css.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body></body>
+  <script>
+    // meta experiment variables
+    var pavlovia_flag = false
+
+    // initialize jspysch
+    var jsPsych = initJsPsych({
+      on_finish: function() {
+        jsPsych.data.displayData();
+      }
+    });
+
+    // create jspsych variables
+    var timeline = [];
+    var preload = [];
+
+    // if pavlovia_flag is true, init connection with pavlovia.org
+    if (pavlovia_flag) {
+      var pavlovia_init = {
+        type: "pavlovia",
+        command: "init"
+      };
+      timeline.push(pavlovia_init)
+    }
+
+    // consent form
+    var check_consent = function(elem) {
+      if (document.getElementById('consent_checkbox').checked) {
+        return true;
+      }
+      else {
+        alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
+        return false;
+      }
+      return false;
+    };
+
+    var consent = {
+      type: jsPsychExternalHtml,
+      url: "consent.html",
+      cont_btn: "start",
+      check_fn: check_consent
+    };
+    // timeline.push(consent)
+
+    // survey stuff
+    var Gender_options = ["Male", "Female", "Transgender Male", "Transgender Female", "Non-binary", "Agender", "Gender not listed", "Do Not Wish To Say"];
+    var Ethnicity_options = ["American Indian or Alaskan Native","Asian","Black or African American","Native Hawaiian or Pacific Islander","White","Hispanic or Latino","Other","Do Not Wish to Respond"];
+
+    var demographics = {
+    	type: jsPsychSurveyMultiChoice,
+    	questions: [{prompt:"Gender Identity:", options: Gender_options, required:true,},
+    	{prompt:"Ethnicity:", options: Ethnicity_options, required:true}]
+    };
+
+    var age = {
+        type: jsPsychSurveyText,
+        questions: [{prompt: "How old are you?"}],
+        post_trial_gap: 100
+    };
+
+    var ProlificID = {
+        type: jsPsychSurveyText,
+        questions: [{prompt: "Please Enter your Prolific ID"}],
+        post_trial_gap: 100
+    };
+
+    var survey_block = {
+      timeline: [demographics, age, ProlificID]
+    };
+    //timeline.push(survey_block)
+
+    // instruction block
+    var instruction_block1 = instruction_engine(1,3,"./instructions_spec.json","./instructions");
+    // timeline.push(instruction_block1)
+
+  </script>
+
+  <!-- <script src="tasks/HMM-beads/HMM-beads.js"></script> -->
+
+  <script>
+    var instruction_block2 = instruction_engine(4,5,"./instructions_spec.json","./instructions");
+    // timeline.push(instruction_block2)
+  </script>
+
+  <script src="tasks/two-arm-new/two-arm-new.js"></script>
+
+  <!-- run experiment -->
+  <script>
+    jsPsych.run(preload.concat(timeline))
+  </script>
+
+</html>
