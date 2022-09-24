@@ -8,7 +8,6 @@ var compose_experiment_display = function(background,objs) {
     topright: ""
   }
   for (let ii = 0; ii < objs.length; ii++) {
-    //html_text += `<div id="jspsych-space-daw-` + objs[ii].tb + `-stim-` + objs[ii].side + `" `;
     if (objs[ii].selected) {dict[objs[ii].tb+objs[ii].side] += `class="jspsych-space-daw-bottom-stim-border" `;}
     dict[objs[ii].tb+objs[ii].side] += `style="background-image: url('` + objs[ii].get_url() + `')"`
   }
@@ -28,6 +27,11 @@ class alien_stim = {
     this.num = num;
     this.state = state;
     this.side = side;
+    if (this.state === '_deact') {this.choice = '';}
+    else {
+      if (this.side === 'left') {this.choice = 'f'}
+      else if (this.side === 'right') {this.choice = 'j'}
+    }
     this.path = path;
     this.selected = false;
     this.tb = 'bottom';
@@ -37,16 +41,48 @@ class alien_stim = {
     return this.path + this.color + '_stim_' + String(this.num) + '.png'
   }
 
+  // get_choice() {
+  //   if (this.state === '_deact') {return ''}
+  //   else {
+  //     if (this.side === 'left') {return 'f'}
+  //     else if (this.side === 'right') {return 'j'}
+  //   }
+  // }
+
   update_selected(response) {
-    
+    if (this.choice === response) {this.selected = true;}
+  }
+
+  update_side(side) {
+    this.side = side;
+    if (this.state === '_deact') {this.choice = '';}
+    else {
+      if (this.side === 'left') {this.choice = 'f';}
+      else if (this.side === 'right') {this.choice = 'j';}
+    }
   }
 }
 
 class reward_stim = {
-  constructor(side) {
+  constructor(side,path) {
     this.side = side;
+    this.path = path;
     this.tb = 'top';
+    this.rew_flag = false;
     this.reward_files = ['noreward.png','treasure.png'];
+  }
+
+  update_side(response) {
+    if (response === 'f') {this.side = 'left';}
+    else if (response === 'j') {this.side = 'right';}
+  }
+
+  update_reward(rew_flag) {
+    this.rew_flag = rew_flag;
+  }
+
+  get_url() {
+    return this.path + Number(this.rew_flag)
   }
 }
 
@@ -61,26 +97,38 @@ class two_arm_practice = {
     this.planet = spec.path + spec.color + '_planet.png';
     this.alien1 = new alien_stim(spec.color,1,spec.alien1_state.'left',spec.path);
     this.alien2 = new alien_stim(spec.color,2, spec.alien2_state,'right',spec.path);
+    if (Math.random() > 0.5) {
+      this.alien1.update_side('left');
+      this.alien2.update_side('right');
+    } else {
+      this.alien2.update_side('left');
+      this.alien1.update_side('right');
+    }
+    this.reward_stim = new reward_stim('middle',spec.path);
   }
 
   get_response_options() {
-
+    return [this.alien1.choice, this.alien2.choice]
   }
 
   choice_response_html() {
-
+    return compose_experiment_display(this.planet,[this.alien1, this.alien2])
   }
 
   register_response(response) {
-
+    this.alien1.update_selected()
+    this.alien2.update_selected()
+    this.reward_stim.update_side()
   }
 
   determine_reward() {
-
+    if (this.alien1.selected) {this.reward_stim.update_reward(this.alien1_rew[this.trial])}
+    else if (this.alien2.selected) {this.reward_stim.update_reward(this.alien2_rew[this.trial])}
   }
 
   determine_reward_prob() {
-
+    if (this.alien1.selected) {this.reward_stim.update_reward(this.alien1_rew > Math.random())}
+    else if (this.alien2.selected) {this.reward_stim.update_reward(this.alien2_rew > Math.random())}
   }
 
   update_alien_states() {
@@ -92,10 +140,19 @@ class two_arm_practice = {
   }
 
   trial_end() {
-
+    if (Math.random() > 0.5) {
+      this.alien1.update_side('left');
+      this.alien2.update_side('right');
+    } else {
+      this.alien2.update_side('left');
+      this.alien1.update_side('right');
+    }
+    this.alien1.selected = false;
+    this.alien2.selected = false;
   }
 }
 
+////////////////////////////////////////////////////////////////////////////
 var alien_practice_spec = {
   path: './tasks/two-arm-new/img/',
   color: 'green',
