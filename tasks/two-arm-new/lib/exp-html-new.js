@@ -35,6 +35,7 @@ class alien_stim = {
     this.path = path;
     this.selected = false;
     this.tb = 'bottom';
+    this.state_names = ['_sad','','_deact'];
   }
 
   get_url() {
@@ -60,6 +61,10 @@ class alien_stim = {
       if (this.side === 'left') {this.choice = 'f';}
       else if (this.side === 'right') {this.choice = 'j';}
     }
+  }
+
+  update_state(rew_flag) {
+    if !(this.state === '_deact') {this.state = this.state_names[Number(rew_flag)]}
   }
 }
 
@@ -92,7 +97,6 @@ class two_arm_practice = {
     this.path = spec.path;
     this.alien1_rew = spec.alien1_rew;
     this.alien2_rew = spec.alien2_rew;
-    // this.state_files = ['_sad',''];
 
     this.planet = spec.path + spec.color + '_planet.png';
     this.alien1 = new alien_stim(spec.color,1,spec.alien1_state.'left',spec.path);
@@ -132,11 +136,12 @@ class two_arm_practice = {
   }
 
   update_alien_states() {
-
+    this.alien1.update_state(this.reward_stim.rew_flag)
+    this.alien2.update_state(this.reward_stim.rew_flag)
   }
 
   reward_html() {
-
+    return compose_experiment_display(this.planet,[this.alien1, this.alien2, this.reward_stim])
   }
 
   trial_end() {
@@ -149,6 +154,8 @@ class two_arm_practice = {
     }
     this.alien1.selected = false;
     this.alien2.selected = false;
+    this.alien1.update_state(true);
+    this.alien2.update_state(true);
   }
 }
 
