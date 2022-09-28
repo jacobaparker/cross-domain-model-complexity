@@ -250,6 +250,60 @@ var aliens_practice_block = {
 }
 timeline.push(aliens_practice_block)
 
+var full_spec = {
+  path: './tasks/two-arm-new/img/',
+  state1_color: 'earth',
+  state2a_color: 'green',
+  state2b_color: 'yellow',
+  stim1_rew: '',
+  stim2_rew: '',
+  stim3_rew: '',
+  stim4_rew: ''
+};
+var two_arm_practice = new two_arm_full(full_spec);
+var state1_choice = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select a rocket',
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_practice.state1.choice_response_html()
+    trial.choices = two_arm_practice.state1.get_response_options()
+  },
+  on_finish: function(trial) {
+    two_arm_practice.state1.register_response(trial.response)
+    two_arm_practice.register_response()
+    });
+};
+
+var state1_response = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select an alien',
+  trial_duration: 500,
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_practice.state1.choice_response_html()
+  },
+  on_finish: function(trial) {
+    two_arm_practice.state1.reset()
+  }
+};
+
+var state2_choice = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select an alien',
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_practice.state1.choice_response_html()
+    trial.choices = two_arm_practice.state1.get_response_options()
+  },
+  on_finish: function(trial) {
+    aliens_practice.state1.register_response(trial.response)
+    });
+}
+
 // Compute the realized reward ahead of time so two-arm sequence is exactly the
 // same between subjects
 

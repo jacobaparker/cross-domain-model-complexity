@@ -226,16 +226,19 @@ class two_arm_practice {
 class two_arm_full {
   constructor(spec) {
     this.path = spec.path;
+    this.trial = 0;
+    this.trial_seq = spec.trial_seq;
+    this.state2_current = 0;
 
     var spec1 = {
       path: spec.path,
-      color: spec.state1a_color,
+      color: spec.state1_color,
       stim1_rew: -1,
       stim2_rew: -1,
       stim1_state: '',
       stim2_state: ''
     }
-    this.state1 = new two_arm_state(spec1)
+    this.state1 = new two_arm_state(spec1);
 
     var spec2a = {
       path: spec.path,
@@ -245,7 +248,7 @@ class two_arm_full {
       stim1_state: '',
       stim2_state: ''
     };
-    this.state2a = new two_arm_state(spec2a)
+    this.state2a = new two_arm_state(spec2a);
 
     var spec2b = {
       path: spec.path,
@@ -255,10 +258,16 @@ class two_arm_full {
       stim1_state: '',
       stim2_state: ''
     };
-    this.state2b = new two_arm_state(spec2b)
+    this.state2b = new two_arm_state(spec2b);
   }
 
-
+  register_response(response) {
+    if (this.state1.stim1.choice === response) {
+      this.state2_current = this.trial_seq[this.trial].S0_A1;
+    } else if (this.state1.stim2.choice === response) {
+      this.state2_current = this.trial_seq[this.trial].S0_A2;
+    }
+  }
 }
 
 class two_arm_stim {
@@ -371,7 +380,7 @@ class two_arm_state {
     return compose_experiment_display(this.planet,stim_objs)
   }
 
-  trial_end() {
+  reset() {
     if (Math.random() > 0.5) {
       this.stim1.update_side('left');
       this.stim2.update_side('right');
