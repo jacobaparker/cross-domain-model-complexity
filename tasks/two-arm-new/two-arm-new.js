@@ -30,7 +30,7 @@ var instructions_1a_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-// timeline.push(instructions_1a_block)
+timeline.push(instructions_1a_block)
 
 var alien_practice_spec = {
   path: './tasks/two-arm-new/img/',
@@ -98,7 +98,7 @@ var alien_1_practice_block = {
   timeline: [alien_1_practice_choice, alien_1_practice_response, alien_1_practice_reward],
   repetitions: 5
 }
-// timeline.push(alien_1_practice_block)
+timeline.push(alien_1_practice_block)
 
 var instructions_1b_block = {
 	type: jsPsychInstructions,
@@ -107,7 +107,7 @@ var instructions_1b_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-// timeline.push(instructions_1b_block)
+timeline.push(instructions_1b_block)
 
 var alien_practice_spec = {
   path: './tasks/two-arm-new/img/',
@@ -174,7 +174,7 @@ var alien_2_practice_block = {
   timeline: [alien_2_practice_choice, alien_2_practice_response, alien_2_practice_reward],
   repetitions: 5
 }
-// timeline.push(alien_2_practice_block)
+timeline.push(alien_2_practice_block)
 
 var instructions_1c_block = {
 	type: jsPsychInstructions,
@@ -183,7 +183,7 @@ var instructions_1c_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-// timeline.push(instructions_1c_block)
+timeline.push(instructions_1c_block)
 
 var alien_practice_spec = {
   path: './tasks/two-arm-new/img/',
@@ -250,6 +250,8 @@ var aliens_practice_block = {
 }
 timeline.push(aliens_practice_block)
 
+// Compute the realized reward ahead of time so two-arm sequence is exactly the
+// same between subjects
 
 
 // experiment.push(change_colors);
