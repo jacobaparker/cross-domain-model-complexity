@@ -23,5 +23,8 @@ def csv_to_json(csvFilePath, jsonFilePath):
 
 instr_csv = './instructions_spec.csv'
 instr_json = './instructions_spec.json'
+two_arm_csv = './tasks/two-arm-new/stimuli/seq8.csv'
+two_arm_json = './tasks/two-arm-new/stimuli/seq8.json'
 
 csv_to_json(instr_csv,instr_json)
+csv_to_json(two_arm_csv,two_arm_json)

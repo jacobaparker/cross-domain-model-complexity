@@ -48,7 +48,7 @@ var compose_experiment_display = function(background,objs) {
     dict[objs[ii].tb+objs[ii].side] += `style="background-image: url('` + objs[ii].get_url() + `')"`
   }
   html_text = `<div style="background-image: url('` + background + `')">`;
-  html_text += `<div style="background-image: url('')"></div>`;  //`<div id="jspsych-space-daw-top-stim-left" ` + dict["topleft"] + `></div>`;
+  html_text += `<div id="jspsych-space-daw-top-stim-left" ` + dict["topleft"] + `></div>`;
   html_text += `<div id="jspsych-space-daw-top-stim-middle" ` + dict["topmiddle"] + `></div>`;
   html_text += `<div id="jspsych-space-daw-top-stim-right" ` + dict["topright"] + `></div>`;
   html_text += `<div style="clear:both"></div>`;
@@ -140,96 +140,94 @@ class rocket_stim {
 
 }
 
-class two_arm_practice {
-  constructor(spec) {
-    this.color = spec.color;
-    this.path = spec.path;
-    this.alien1_rew = spec.alien1_rew;
-    this.alien2_rew = spec.alien2_rew;
-    this.trial = 0;
-    this.choice = 0;
-
-    this.planet = spec.path + spec.color + '_planet.png';
-    this.alien1 = new alien_stim(spec.color,1,spec.alien1_state,'left',spec.path);
-    this.alien2 = new alien_stim(spec.color,2, spec.alien2_state,'right',spec.path);
-    if (Math.random() > 0.5) {
-      this.alien1.update_side('left');
-      this.alien2.update_side('right');
-    } else {
-      this.alien2.update_side('left');
-      this.alien1.update_side('right');
-    }
-    this.reward_stim = new reward_stim('middle',spec.path);
-  }
-
-  get_response_options() {
-    return [this.alien1.choice, this.alien2.choice]
-  }
-
-  choice_response_html() {
-    return compose_experiment_display(this.planet,[this.alien1, this.alien2])
-  }
-
-  register_response(response) {
-    this.alien1.update_selected(response)
-    this.alien2.update_selected(response)
-    this.reward_stim.update_side(response)
-  }
-
-  determine_reward() {
-    if (this.alien1.selected) {
-      this.choice = 1;
-      this.rewarded = this.alien1_rew[this.trial];
-    }
-    else if (this.alien2.selected) {
-      this.choice = 2;
-      this.rewarded = this.alien2_rew[this.trial];
-    }
-    this.reward_stim.update_reward(this.rewarded)
-  }
-
-  determine_reward_prob() {
-    if (this.alien1.selected) {
-      this.rewarded = Number(this.alien1_rew > Math.random())
-    }
-    else if (this.alien2.selected) {
-      this.rewarded = Number(this.alien2_rew > Math.random())
-    }
-    this.reward_stim.update_reward(this.rewarded)
-  }
-
-  update_alien_states() {
-    if (this.alien1.selected) {this.alien1.update_state(this.reward_stim.rew_flag)}
-    else if (this.alien2.selected) {this.alien2.update_state(this.reward_stim.rew_flag)}
-  }
-
-  reward_html() {
-    return compose_experiment_display(this.planet,[this.alien1, this.alien2, this.reward_stim])
-  }
-
-  trial_end() {
-    if (Math.random() > 0.5) {
-      this.alien1.update_side('left');
-      this.alien2.update_side('right');
-    } else {
-      this.alien2.update_side('left');
-      this.alien1.update_side('right');
-    }
-    this.alien1.selected = false;
-    this.alien2.selected = false;
-    this.alien1.update_state(1);
-    this.alien2.update_state(1);
-    this.trial += 1;
-  }
-}
+// class two_arm_practice {
+//   constructor(spec) {
+//     this.color = spec.color;
+//     this.path = spec.path;
+//     this.alien1_rew = spec.alien1_rew;
+//     this.alien2_rew = spec.alien2_rew;
+//     this.trial = 0;
+//     this.choice = 0;
+//
+//     this.planet = spec.path + spec.color + '_planet.png';
+//     this.alien1 = new alien_stim(spec.color,1,spec.alien1_state,'left',spec.path);
+//     this.alien2 = new alien_stim(spec.color,2, spec.alien2_state,'right',spec.path);
+//     if (Math.random() > 0.5) {
+//       this.alien1.update_side('left');
+//       this.alien2.update_side('right');
+//     } else {
+//       this.alien2.update_side('left');
+//       this.alien1.update_side('right');
+//     }
+//     this.reward_stim = new reward_stim('middle',spec.path);
+//   }
+//
+//   get_response_options() {
+//     return [this.alien1.choice, this.alien2.choice]
+//   }
+//
+//   choice_response_html() {
+//     return compose_experiment_display(this.planet,[this.alien1, this.alien2])
+//   }
+//
+//   register_response(response) {
+//     this.alien1.update_selected(response)
+//     this.alien2.update_selected(response)
+//     this.reward_stim.update_side(response)
+//   }
+//
+//   determine_reward() {
+//     if (this.alien1.selected) {
+//       this.choice = 1;
+//       this.rewarded = this.alien1_rew[this.trial];
+//     }
+//     else if (this.alien2.selected) {
+//       this.choice = 2;
+//       this.rewarded = this.alien2_rew[this.trial];
+//     }
+//     this.reward_stim.update_reward(this.rewarded)
+//   }
+//
+//   determine_reward_prob() {
+//     if (this.alien1.selected) {
+//       this.rewarded = Number(this.alien1_rew > Math.random())
+//     }
+//     else if (this.alien2.selected) {
+//       this.rewarded = Number(this.alien2_rew > Math.random())
+//     }
+//     this.reward_stim.update_reward(this.rewarded)
+//   }
+//
+//   update_alien_states() {
+//     if (this.alien1.selected) {this.alien1.update_state(this.reward_stim.rew_flag)}
+//     else if (this.alien2.selected) {this.alien2.update_state(this.reward_stim.rew_flag)}
+//   }
+//
+//   reward_html() {
+//     return compose_experiment_display(this.planet,[this.alien1, this.alien2, this.reward_stim])
+//   }
+//
+//   trial_end() {
+//     if (Math.random() > 0.5) {
+//       this.alien1.update_side('left');
+//       this.alien2.update_side('right');
+//     } else {
+//       this.alien2.update_side('left');
+//       this.alien1.update_side('right');
+//     }
+//     this.alien1.selected = false;
+//     this.alien2.selected = false;
+//     this.alien1.update_state(1);
+//     this.alien2.update_state(1);
+//     this.trial += 1;
+//   }
+// }
 
 class two_arm_full {
   constructor(spec) {
     this.path = spec.path;
     this.trial = 0;
-    this.trial_seq = spec.trial_seq;
-    this.A1_outcomes = spec.trial_seq.S0_A1
-    this.A2_outcomes = spec.trial_seq.S0_A2
+    this.trial_seq
     this.state2_current = 0;
     this.action_current = 0;
 
@@ -264,13 +262,18 @@ class two_arm_full {
     this.state2b = new two_arm_state(spec2b);
   }
 
+  trial_start() {
+    this.A1_outcome = this.trial_seq[this.trial].S0_A1
+    this.A2_outcome = this.trial_seq[this.trial].S0_A2
+  }
+
   register_response_state1(response) {
     if (this.state1.stim1.choice === response) {
-      this.state2_current = this.A1_outcomes[this.trial];
+      this.state2_current = this.A1_outcome;
       this.action_current = 0;
       this.state1.stim1.selected = true;
     } else if (this.state1.stim2.choice === response) {
-      this.state2_current = this.A2_outcomes[this.trial];
+      this.state2_current = this.A2_outcome;
       this.action_current = 1;
       this.state1.stim2.selected = true;
     }
@@ -313,6 +316,33 @@ class two_arm_full {
     } else if (this.state2_current === 1) {
       this.state2b.determine_reward()
     }
+  }
+
+  update_alien_states() {
+    if (this.state2_current === 0) {
+      this.state2a.update_alien_states()
+    } else if (this.state2_current === 1) {
+      this.state2b.update_alien_states()
+    }
+  }
+
+  state2_reward_html() {
+    if (this.action_current === 0) {var state1_stim = this.state1.stim1}
+    else if (this.action_current === 1) {var state1_stim = this.state1.stim2}
+    if (this.state2_current === 0) {
+      return this.state2a.reward_html(state1_stim)
+    } else if (this.state2_current === 1) {
+      return this.state2b.reward_html(state1_stim)
+    }
+  }
+
+  trial_end() {
+    this.state1.trial_end()
+    this.state2a.trial_end()
+    this.state2b.trial_end()
+    this.state1.stim1.state = '';
+    this.state1.stim2.state = '';
+    this.trial += 1;
   }
 
 }
@@ -401,13 +431,17 @@ class two_arm_state {
     this.reward_stim.update_side(response)
   }
 
+  // perhaps undo changes that were just made here and convert stimulus reward
+  // info into arrays that are passed directly to each state
   determine_reward() {
     if (this.stim1.selected) {
       this.choice = 1;
-      if (this.stim1_rew.length > 1) {
+      if (typeof(this.stim1_rew) === 'object') {
         this.rewarded = Number(this.stim1_rew[this.trial] > Math.random())
-      } else {
+      } else if (typeof(this.stim1_rew) === 'number') {
         this.rewarded = Number(this.stim1_rew > Math.random())
+      } else if (typeof(this.stim1_rew) === undefined) {
+        this.rewarded = Number(this. > Math.random())
       }
     } else if (this.stim2.selected) {
       this.choice = 2;
@@ -453,7 +487,7 @@ class two_arm_state {
     return compose_experiment_display(this.planet,stim_objs)
   }
 
-  reset() {
+  trial_end() {
     if (Math.random() > 0.5) {
       this.stim1.update_side('left');
       this.stim2.update_side('right');
