@@ -258,7 +258,8 @@ var full_spec = {
   stim1_rew: '',
   stim2_rew: '',
   stim3_rew: '',
-  stim4_rew: ''
+  stim4_rew: '',
+  trial_seq: seq_data
 };
 var two_arm_practice = new two_arm_full(full_spec);
 var state1_choice = {
@@ -272,7 +273,7 @@ var state1_choice = {
   },
   on_finish: function(trial) {
     two_arm_practice.state1.register_response(trial.response)
-    two_arm_practice.register_response()
+    two_arm_practice.register_response_state1(trial.response)
     });
 };
 
@@ -286,7 +287,7 @@ var state1_response = {
     trial.stimulus =  two_arm_practice.state1.choice_response_html()
   },
   on_finish: function(trial) {
-    two_arm_practice.state1.reset()
+    two_arm_practice.prepare_carryover_stim()
   }
 };
 
@@ -296,13 +297,28 @@ var state2_choice = {
   choices: [],
   prompt: 'Press F or J to select an alien',
   on_start: function(trial) {
-    trial.stimulus =  two_arm_practice.state1.choice_response_html()
-    trial.choices = two_arm_practice.state1.get_response_options()
+    trial.stimulus =  two_arm_practice.state2_choice_response_html()
+    trial.choices = two_arm_practice.state2_get_response_options()
   },
   on_finish: function(trial) {
-    aliens_practice.state1.register_response(trial.response)
+    two_arm_practice.register_response_state2(response)
+    two_arm_practice.determine_reward()
     });
 }
+
+var state2_response = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select an alien',
+  trial_duration: 500,
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_practice.state2_choice_response_html()
+  },
+  on_finish: function(trial) {
+    two_arm_practice.
+  }
+};
 
 // Compute the realized reward ahead of time so two-arm sequence is exactly the
 // same between subjects
