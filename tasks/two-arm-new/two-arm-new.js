@@ -279,7 +279,7 @@ var state1_response = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: '',
   choices: [],
-  prompt: 'Press F or J to select an alien',
+  prompt: 'Press F or J to select a rocket',
   trial_duration: 500,
   on_start: function(trial) {
     trial.stimulus =  two_arm_practice.state1.choice_response_html()
@@ -328,6 +328,14 @@ var state2_reward = {
     trial.stimulus =  two_arm_practice.state2_reward_html()
   },
   on_finish: function(trial) {
+    jsPsych.data.get().addToLast({
+      block: 'two_arm_practice',
+      trial_number: two_arm_practice.trial+1,
+      state1_action: two_arm_practice.action_current+1,
+      state2_visited: two_arm_practice.state2_current+1,
+      choice: two_arm_practice.choice,
+      rewarded: two_arm_practice.rewarded
+    });
     two_arm_practice.trial_end()
   }
 }

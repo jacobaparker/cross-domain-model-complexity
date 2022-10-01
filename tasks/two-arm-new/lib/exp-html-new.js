@@ -230,6 +230,8 @@ class two_arm_full {
     this.trial_seq = spec.trial_seq;
     this.state2_current = 0;
     this.action_current = 0;
+    this.choice = 0;
+    this.rewarded = 0;
     var Rw1 = [];
     var Rw2 = [];
     var Rw3 = [];
@@ -323,8 +325,12 @@ class two_arm_full {
   determine_reward() {
     if (this.state2_current === 0) {
       this.state2a.determine_reward()
+      this.choice = this.state2a.choice;
+      this.rewarded = this.state2a.rewarded;
     } else if (this.state2_current === 1) {
       this.state2b.determine_reward()
+      this.choice = this.state2b.choice+2;
+      this.rewarded = this.state2a.rewarded;
     }
   }
 
@@ -416,6 +422,7 @@ class two_arm_state {
     this.stim2_rew = spec.stim2_rew;
     this.trial = 0;
     this.choice = 0;
+    this.rewarded = 0;
 
     this.planet = spec.path + spec.color + '_planet.png';
     this.stim1 = new two_arm_stim(spec.color,1,spec.stim1_state,'left',spec.path);
@@ -446,8 +453,6 @@ class two_arm_state {
     this.reward_stim.update_side(response)
   }
 
-  // perhaps undo changes that were just made here and convert stimulus reward
-  // info into arrays that are passed directly to each state
   determine_reward() {
     if (this.stim1.selected) {
       this.choice = 1;
