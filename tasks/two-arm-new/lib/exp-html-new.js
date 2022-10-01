@@ -227,9 +227,19 @@ class two_arm_full {
   constructor(spec) {
     this.path = spec.path;
     this.trial = 0;
-    this.trial_seq
+    this.trial_seq = spec.trial_seq;
     this.state2_current = 0;
     this.action_current = 0;
+    var Rw1 = [];
+    var Rw2 = [];
+    var Rw3 = [];
+    var Rw4 = [];
+    for (var ii = 0; ii<spec.trial_seq.length; ii++) {
+      Rw1.push(spec.trial_seq[ii].PRw1)
+      Rw2.push(spec.trial_seq[ii].PRw2)
+      Rw3.push(spec.trial_seq[ii].PRw3)
+      Rw4.push(spec.trial_seq[ii].PRw4)
+    }
 
     var spec1 = {
       path: spec.path,
@@ -244,8 +254,8 @@ class two_arm_full {
     var spec2a = {
       path: spec.path,
       color: spec.state2a_color,
-      stim1_rew: spec.trial_seq.PRw1,
-      stim2_rew: spec.trial_seq.PRw2,
+      stim1_rew: Rw1,
+      stim2_rew: Rw2,
       stim1_state: '',
       stim2_state: ''
     };
@@ -254,8 +264,8 @@ class two_arm_full {
     var spec2b = {
       path: spec.path,
       color: spec.state2b_color,
-      stim1_rew: spec.trial_seq.PRw3,
-      stim2_rew: spec.trial_seq.PRw4,
+      stim1_rew: Rw3,
+      stim2_rew: Rw4,
       stim1_state: '',
       stim2_state: ''
     };
@@ -269,11 +279,11 @@ class two_arm_full {
 
   register_response_state1(response) {
     if (this.state1.stim1.choice === response) {
-      this.state2_current = this.A1_outcome;
+      this.state2_current = Number(this.A1_outcome);
       this.action_current = 0;
       this.state1.stim1.selected = true;
     } else if (this.state1.stim2.choice === response) {
-      this.state2_current = this.A2_outcome;
+      this.state2_current = Number(this.A2_outcome);
       this.action_current = 1;
       this.state1.stim2.selected = true;
     }
@@ -337,11 +347,11 @@ class two_arm_full {
   }
 
   trial_end() {
+    this.state1.stim1.reset_carryover()
+    this.state1.stim2.reset_carryover()
     this.state1.trial_end()
     this.state2a.trial_end()
     this.state2b.trial_end()
-    this.state1.stim1.state = '';
-    this.state1.stim2.state = '';
     this.trial += 1;
   }
 
@@ -391,6 +401,11 @@ class two_arm_stim {
     this.state = '_deact';
     this.selected = false;
   }
+
+  reset_carryover() {
+    this.tb = 'bottom';
+    this.state = '';
+  }
 }
 
 class two_arm_state {
@@ -436,12 +451,10 @@ class two_arm_state {
   determine_reward() {
     if (this.stim1.selected) {
       this.choice = 1;
-      if (typeof(this.stim1_rew) === 'object') {
+      if (this.stim1_rew.length > 1) {
         this.rewarded = Number(this.stim1_rew[this.trial] > Math.random())
-      } else if (typeof(this.stim1_rew) === 'number') {
+      } else {
         this.rewarded = Number(this.stim1_rew > Math.random())
-      } else if (typeof(this.stim1_rew) === undefined) {
-        this.rewarded = Number(this. > Math.random())
       }
     } else if (this.stim2.selected) {
       this.choice = 2;

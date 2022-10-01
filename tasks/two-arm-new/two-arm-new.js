@@ -299,7 +299,7 @@ var state2_choice = {
     trial.choices = two_arm_practice.state2_get_response_options()
   },
   on_finish: function(trial) {
-    two_arm_practice.register_response_state2(response)
+    two_arm_practice.register_response_state2(trial.response)
     two_arm_practice.determine_reward()
   }
 }
