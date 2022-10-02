@@ -30,7 +30,7 @@ var instructions_1a_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-// timeline.push(instructions_1a_block)
+timeline.push(instructions_1a_block)
 
 var alien_practice_spec = {
   path: './tasks/two-arm-new/img/',
@@ -98,7 +98,7 @@ var alien_1_practice_block = {
   timeline: [alien_1_practice_choice, alien_1_practice_response, alien_1_practice_reward],
   repetitions: 5
 }
-// timeline.push(alien_1_practice_block)
+timeline.push(alien_1_practice_block)
 
 var instructions_1b_block = {
 	type: jsPsychInstructions,
@@ -107,7 +107,7 @@ var instructions_1b_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-// timeline.push(instructions_1b_block)
+timeline.push(instructions_1b_block)
 
 var alien_practice_spec = {
   path: './tasks/two-arm-new/img/',
@@ -174,7 +174,7 @@ var alien_2_practice_block = {
   timeline: [alien_2_practice_choice, alien_2_practice_response, alien_2_practice_reward],
   repetitions: 5
 }
-// timeline.push(alien_2_practice_block)
+timeline.push(alien_2_practice_block)
 
 var instructions_1c_block = {
 	type: jsPsychInstructions,
@@ -183,7 +183,7 @@ var instructions_1c_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-// timeline.push(instructions_1c_block)
+timeline.push(instructions_1c_block)
 
 var alien_practice_spec = {
   path: './tasks/two-arm-new/img/',
@@ -205,7 +205,7 @@ var aliens_practice_choice = {
   },
   on_finish: function(trial) {
     aliens_practice.register_response(trial.response)
-    aliens_practice.determine_reward_prob()
+    aliens_practice.determine_reward()
     jsPsych.data.get().addToLast({
       block: 'aliens_practice',
       trial_number: aliens_practice.trial,
@@ -248,7 +248,7 @@ var aliens_practice_block = {
   timeline: [aliens_practice_choice, aliens_practice_response, aliens_practice_reward],
   repetitions: 20
 }
-// timeline.push(aliens_practice_block)
+timeline.push(aliens_practice_block)
 
 
 var full_spec = {
@@ -256,9 +256,11 @@ var full_spec = {
   state1_color: 'earth',
   state2a_color: 'green',
   state2b_color: 'yellow',
-  trial_seq: seq_data
+  trial_seq: seq_data,
+  display_score: true
 };
 var two_arm_practice = new two_arm_full(full_spec);
+
 var state1_choice = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: '',
@@ -266,7 +268,7 @@ var state1_choice = {
   prompt: 'Press F or J to select a rocket',
   on_start: function(trial) {
     two_arm_practice.trial_start()
-    trial.stimulus =  two_arm_practice.state1.choice_response_html()
+    trial.stimulus =  two_arm_practice.state1_choice_response_html()
     trial.choices = two_arm_practice.state1.get_response_options()
   },
   on_finish: function(trial) {
@@ -282,7 +284,7 @@ var state1_response = {
   prompt: 'Press F or J to select a rocket',
   trial_duration: 500,
   on_start: function(trial) {
-    trial.stimulus =  two_arm_practice.state1.choice_response_html()
+    trial.stimulus =  two_arm_practice.state1_choice_response_html()
   },
   on_finish: function(trial) {
     two_arm_practice.prepare_carryover_stim()
@@ -315,6 +317,7 @@ var state2_response = {
   },
   on_finish: function(trial) {
     two_arm_practice.update_alien_states()
+    two_arm_practice.update_score()
   }
 };
 
@@ -345,6 +348,8 @@ var two_arm_practice_block = {
   repetitions: 25
 }
 timeline.push(two_arm_practice_block)
+
+
 
 // Compute the realized reward ahead of time so two-arm sequence is exactly the
 // same between subjects

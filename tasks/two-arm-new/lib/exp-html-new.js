@@ -232,6 +232,8 @@ class two_arm_full {
     this.action_current = 0;
     this.choice = 0;
     this.rewarded = 0;
+    this.display_score = spec.display_score;
+    this.score = 0;
     var Rw1 = [];
     var Rw2 = [];
     var Rw3 = [];
@@ -274,9 +276,21 @@ class two_arm_full {
     this.state2b = new two_arm_state(spec2b);
   }
 
+  html_wrapper(html_string) {
+    if (this.display_score) {
+      return html_string + "<p>Score: " + String(this.score) + "</p>"
+    } else {
+      return html_string
+    }
+  }
+
   trial_start() {
     this.A1_outcome = this.trial_seq[this.trial].S0_A1
     this.A2_outcome = this.trial_seq[this.trial].S0_A2
+  }
+
+  state1_choice_response_html() {
+    return this.html_wrapper(this.state1.choice_response_html())
   }
 
   register_response_state1(response) {
@@ -300,9 +314,9 @@ class two_arm_full {
     if (this.action_current === 0) {var state1_stim = this.state1.stim1}
     else if (this.action_current === 1) {var state1_stim = this.state1.stim2}
     if (this.state2_current === 0) {
-      return this.state2a.choice_response_html(state1_stim)
+      return this.html_wrapper(this.state2a.choice_response_html(state1_stim))
     } else if (this.state2_current === 1) {
-      return this.state2b.choice_response_html(state1_stim)
+      return this.html_wrapper(this.state2b.choice_response_html(state1_stim))
     }
   }
 
@@ -330,8 +344,9 @@ class two_arm_full {
     } else if (this.state2_current === 1) {
       this.state2b.determine_reward()
       this.choice = this.state2b.choice+2;
-      this.rewarded = this.state2a.rewarded;
+      this.rewarded = this.state2b.rewarded;
     }
+    console.log(this.rewarded)
   }
 
   update_alien_states() {
@@ -342,13 +357,18 @@ class two_arm_full {
     }
   }
 
+  update_score() {
+    console.log(this.rewarded)
+    this.score += this.rewarded;
+  }
+
   state2_reward_html() {
     if (this.action_current === 0) {var state1_stim = this.state1.stim1}
     else if (this.action_current === 1) {var state1_stim = this.state1.stim2}
     if (this.state2_current === 0) {
-      return this.state2a.reward_html(state1_stim)
+      return this.html_wrapper(this.state2a.reward_html(state1_stim))
     } else if (this.state2_current === 1) {
-      return this.state2b.reward_html(state1_stim)
+      return this.html_wrapper(this.state2b.reward_html(state1_stim))
     }
   }
 

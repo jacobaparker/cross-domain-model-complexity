@@ -41,6 +41,10 @@ for s in range(Nsequences):
         "PRw2": np.empty((Ntrials)),
         "PRw3": np.empty((Ntrials)),
         "PRw4": np.empty((Ntrials)),
+        "Rw1": np.empty((Ntrials)),
+        "Rw2": np.empty((Ntrials)),
+        "Rw3": np.empty((Ntrials)),
+        "Rw4": np.empty((Ntrials))
         }
     )
     # tdf.PRw1[0] = PRw_init[0]
@@ -63,7 +67,8 @@ for s in range(Nsequences):
                 PRw_add[r] = 2*Rw_prob_min - 2*PRw_all[t-1,r] - deltaRw
             else:
                 PRw_add[r] = deltaRw
-                
+
+
         PRw_all[t,:] = PRw_all[t-1,:] + PRw_add
 
     tdf.PRw1 = PRw_all[:,0]
@@ -71,8 +76,26 @@ for s in range(Nsequences):
     tdf.PRw3 = PRw_all[:,2]
     tdf.PRw4 = PRw_all[:,3]
 
+    for t in range(len(tdf)):
+        tdf.Rw1[t] = int(tdf.PRw1[t] > random.random())
+        tdf.Rw2[t] = int(tdf.PRw2[t] > random.random())
+        tdf.Rw3[t] = int(tdf.PRw3[t] > random.random())
+        tdf.Rw4[t] = int(tdf.PRw4[t] > random.random())
+
     ax1 = tdf.plot.line(x="Trial",y=['PRw1','PRw2','PRw3','PRw4'])
     plt.savefig("stimuli/seq" + str(s) + "_rew-prob.png")
+
+    # finish this raster plot
+    Rw1_ind = np.nonzero(tdf.Rw1)
+    Rw2_ind = np.nonzero(tdf.Rw2)
+    Rw3_ind = np.nonzero(tdf.Rw3)
+    Rw4_ind = np.nonzero(tdf.Rw4)
+
+    fig3, ax3 = plt.subplots(1,1)
+    ax3.scatter(Rw1_ind+1,1*np.ones(len(Rw1_ind)),'k')
+    ax3.scatter(Rw2_ind+1,1*np.ones(len(Rw2_ind)),'k')
+    ax3.scatter(Rw3_ind+1,1*np.ones(len(Rw3_ind)),'k')
+    ax3.scatter(Rw4_ind+1,1*np.ones(len(Rw4_ind)),'k')
 
     ax2 = tdf.plot.scatter(x="Trial",y="S0_A1",c='b')
     tdf.plot.scatter(x="Trial",y="S0_A2",c='orange',ax=ax2)
