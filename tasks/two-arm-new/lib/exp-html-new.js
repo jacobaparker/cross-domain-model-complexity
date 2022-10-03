@@ -239,10 +239,10 @@ class two_arm_full {
     var Rw3 = [];
     var Rw4 = [];
     for (var ii = 0; ii<spec.trial_seq.length; ii++) {
-      Rw1.push(spec.trial_seq[ii].PRw1)
-      Rw2.push(spec.trial_seq[ii].PRw2)
-      Rw3.push(spec.trial_seq[ii].PRw3)
-      Rw4.push(spec.trial_seq[ii].PRw4)
+      Rw1.push(spec.trial_seq[ii].Rw1)
+      Rw2.push(spec.trial_seq[ii].Rw2)
+      Rw3.push(spec.trial_seq[ii].Rw3)
+      Rw4.push(spec.trial_seq[ii].Rw4)
     }
 
     var spec1 = {

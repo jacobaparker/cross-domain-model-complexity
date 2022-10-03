@@ -77,10 +77,10 @@ for s in range(Nsequences):
     tdf.PRw4 = PRw_all[:,3]
 
     for t in range(len(tdf)):
-        tdf.Rw1[t] = int(tdf.PRw1[t] > random.random())
-        tdf.Rw2[t] = int(tdf.PRw2[t] > random.random())
-        tdf.Rw3[t] = int(tdf.PRw3[t] > random.random())
-        tdf.Rw4[t] = int(tdf.PRw4[t] > random.random())
+        tdf.loc[t,'Rw1'] = int(tdf.PRw1[t] > random.random())
+        tdf.loc[t,'Rw2'] = int(tdf.PRw2[t] > random.random())
+        tdf.loc[t,'Rw3'] = int(tdf.PRw3[t] > random.random())
+        tdf.loc[t,'Rw4'] = int(tdf.PRw4[t] > random.random())
 
     ax1 = tdf.plot.line(x="Trial",y=['PRw1','PRw2','PRw3','PRw4'])
     plt.savefig("stimuli/seq" + str(s) + "_rew-prob.png")

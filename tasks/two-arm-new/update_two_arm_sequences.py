@@ -15,25 +15,25 @@ tdf['Rw3'] = np.empty((len(tdf)))
 tdf['Rw4'] = np.empty((len(tdf)))
 
 for t in range(len(tdf)):
-    tdf.Rw1.iloc[t] = int(tdf.PRw1[t] > random.random())
-    tdf.Rw2.iloc[t] = int(tdf.PRw2[t] > random.random())
-    tdf.Rw3.iloc[t] = int(tdf.PRw3[t] > random.random())
-    tdf.Rw4.iloc[t] = int(tdf.PRw4[t] > random.random())
+    tdf.loc[t,'Rw1'] = int(tdf.PRw1[t] > random.random())
+    tdf.loc[t,'Rw2'] = int(tdf.PRw2[t] > random.random())
+    tdf.loc[t,'Rw3'] = int(tdf.PRw3[t] > random.random())
+    tdf.loc[t,'Rw4'] = int(tdf.PRw4[t] > random.random())
 
-Rw1_ind = np.nonzero(tdf.Rw1)
-Rw2_ind = np.nonzero(tdf.Rw2)
-Rw3_ind = np.nonzero(tdf.Rw3)
-Rw4_ind = np.nonzero(tdf.Rw4)
+Rw1_ind = np.array(np.nonzero(tdf.Rw1)).flatten()
+Rw2_ind = np.array(np.nonzero(tdf.Rw2)).flatten()
+Rw3_ind = np.array(np.nonzero(tdf.Rw3)).flatten()
+Rw4_ind = np.array(np.nonzero(tdf.Rw4)).flatten()
 
 fig3, ax3 = plt.subplots(1,1)
-ax3.scatter(Rw1_ind+1,1*np.ones(len(Rw1_ind)),'k')
-ax3.scatter(Rw2_ind+1,1*np.ones(len(Rw2_ind)),'k')
-ax3.scatter(Rw3_ind+1,1*np.ones(len(Rw3_ind)),'k')
-ax3.scatter(Rw4_ind+1,1*np.ones(len(Rw4_ind)),'k')
+ax3.scatter(Rw1_ind+1,1*np.ones((Rw1_ind.shape[0])),marker="|")
+ax3.scatter(Rw2_ind+1,2*np.ones((Rw2_ind.shape[0])),marker="|")
+ax3.scatter(Rw3_ind+1,3*np.ones((Rw3_ind.shape[0])),marker="|")
+ax3.scatter(Rw4_ind+1,4*np.ones((Rw4_ind.shape[0])),marker="|")
 plt.savefig("stimuli/seq"+str(seqnum)+"_rew-actual.png")
 
 tdf.to_csv(
-    path_or_buf="stimuli/seq"+str(seqnum)+".csv",
+    path_or_buf="stimuli/seq"+str(seqnum)+"_new.csv",
     header=True,
     index=False
 )

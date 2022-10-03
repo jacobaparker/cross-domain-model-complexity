@@ -8,6 +8,8 @@ var Block_Index = 0;
 var instruction_picker = 1;
 var beads_path = './tasks/HMM-beads/'
 
+// LOOK AT WHAT ALEX DID FOR TRIAL FEEDBACK
+
 // Session order - uncomment the order you want
 var All_Type = ['Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual'];
 //var All_Type = ['Low_HMMActual','High_HMMActual','Low_MMActual','High_MMActual']
@@ -177,7 +179,7 @@ var beads_Instruction_trialQ4 = {
 var beads_intro_block = {
   timeline: [beads_instruction_block, beads_Instruction_trialQ1,beads_Instruction_trialQ2,beads_Instruction_trialQ3,beads_instruction_trial]
 }
-timeline.push(beads_intro_block)
+// timeline.push(beads_intro_block)
 
 
 LHMM_text = '<p style="font-family:Arial;text-align:center;width:800px;font-size:18px"> Press the SPACEBAR to continue.</p>';
@@ -214,16 +216,17 @@ var beads_load_trial = {
 
 var beads_TrialStart = {
 
-    type: jsPsychImageButtonResponse,
+    type: jsPsychImageKeyboardResponse,
     stimulus: '',
     stimulus_width: 900,
     maintain_aspect_ratio: true,
-    prompt: "<p>Please select a bead color and your confidence in that choice.</p>",
-    button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-                    '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-                    '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
-                    '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
-    choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
+    prompt: "<p>Please select a bead color.</p>",
+    choices: ['f','j'],
+    // button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
+    //                 '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
+    //                 '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
+    //                 '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
+    // choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
     /*
     button_html: ['<button class="jspsych-btn" style="background-color:black; color:white">%choice%</button>',
     '<button class="jspsych-btn" style="background-color:black; color:white">%choice%</button>',
@@ -255,24 +258,24 @@ var beads_TrialStart = {
     },
 
     on_finish: function(trial){
-        if(trial.response === 0 || trial.response === 1) {
+        if (trial.response === 'f') {
             ChoiceDirection = '1';
-        }
-        if(trial.response === 2 || trial.response === 3) {
+        } else if (trial.response ==='j') {
             ChoiceDirection = '2';
         }
     },
 };
 
 var beads_SubjectChoice = {
-    type: jsPsychImageButtonResponse,
+    type: jsPsychImageKeyboardResponse,
     stimulus: '',
-    button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-                '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-                '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
-                '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
-    choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
-    prompt: "<p>Please select a bead color and your confidence in that choice.</p>",
+    // button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
+    //             '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
+    //             '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
+    //             '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
+    // choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
+    choices: [],
+    prompt: "<p>Please select a bead color.</p>",
     stimulus_width: 900,
     maintain_aspect_ratio: true,
     trial_duration: 300,
@@ -292,14 +295,15 @@ var beads_SubjectChoice = {
 
 
 var beads_BeadAppears = {
-    type: jsPsychImageButtonResponse,
+    type: jsPsychImageKeyboardResponse,
     stimulus: '',
-    button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-                '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-                '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
-                '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
-    choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
-    prompt: "<p>Please select a bead color and your confidence in that choice.</p>",
+    choices: [],
+    // button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
+    //             '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
+    //             '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
+    //             '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
+    // choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
+    prompt: "<p>Please select a bead color.</p>",
     stimulus_width: 900,
     maintain_aspect_ratio: true,
     trial_duration: 500,
@@ -356,7 +360,7 @@ var beads_reset_trial = {
 
 var beads_training_trials = {
     timeline: [beads_TrialStart,beads_SubjectChoice,beads_BeadAppears],
-    repetitions: 2
+    repetitions: 10
 };
 
 var beads_training_block = {
@@ -366,7 +370,7 @@ timeline.push(beads_training_block)
 
 var beads_experiment_trials = {
     timeline: [beads_TrialStart,beads_SubjectChoice,beads_BeadAppears],
-    repetitions: 3
+    repetitions: 10
 };
 
 var beads_experiment_block = {
@@ -377,3 +381,15 @@ var beads_experiment_block = {
 // timeline.push(beads_instruction_trial)
 // timeline.push(beads_instruction_trial)
 // timeline.push(beads_experiment_block)
+
+var HMM_beads_task = {
+  timeline: [
+    beads_intro_block,
+    beads_training_block,
+    beads_instruction_trial,
+    beads_experiment_block,
+    beads_instruction_trial,
+    beads_instruction_trial,
+    beads_experiment_block
+  ]
+}
