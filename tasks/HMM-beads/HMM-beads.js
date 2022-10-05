@@ -101,6 +101,22 @@ var beads_preload = {
 };
 preload.push(beads_preload)
 
+var beads_instructions_block1 = {
+	type: jsPsychInstructions,
+	pages: beads_instructions_1_text(),
+	key_forward: "j",
+	key_backward: "f",
+	show_clickable_nav: true,
+}
+timeline.push(beads_instructions_block1)
+
+// var beads_test_instr = {
+//   type: jsPsychImageKeyboardResponse,
+//   stimulus: beads_path + 'instructions/Slide1.PNG',
+//   choices: [' ']
+// }
+// timeline.push(beads_test_instr)
+
 var beads_instruction_trial = {
   type: jsPsychImageKeyboardResponse,
   stimulus: '',
@@ -366,7 +382,6 @@ var beads_training_trials = {
 var beads_training_block = {
   timeline: [beads_load_trial, beads_training_trials, beads_reset_trial]
 }
-timeline.push(beads_training_block)
 
 var beads_experiment_trials = {
     timeline: [beads_TrialStart,beads_SubjectChoice,beads_BeadAppears],
@@ -376,11 +391,6 @@ var beads_experiment_trials = {
 var beads_experiment_block = {
   timeline: [beads_load_trial, beads_experiment_trials, beads_reset_trial]
 }
-// timeline.push(beads_instruction_trial)
-// timeline.push(beads_experiment_block)
-// timeline.push(beads_instruction_trial)
-// timeline.push(beads_instruction_trial)
-// timeline.push(beads_experiment_block)
 
 var HMM_beads_task = {
   timeline: [
