@@ -2,9 +2,9 @@ var seq_num = 8;
 var seq_file = "./tasks/two-arm-new/stimuli/seq" + String(seq_num) + ".json";
 var p_alien_1_ps = [1, 1, 1, 0, 1];
 var p_alien_2_ps = [0, 1, 0, 0, 0];
-var Ntrials_full_exp = 20
-var Ntrials_full_prac = 5
-var Ntrials_aliens_prac = 5
+var Ntrials_full_exp = two_arm_exp_ntrials;
+var Ntrials_full_prac = two_arm_prac_ntrials;
+var Ntrials_aliens_prac = two_arm_prac_ntrials;
 
 // IMPLEMENT 2 SEC TIME LIMIT ON FULL TWO ARM
 
@@ -482,65 +482,3 @@ var two_arm_task = {
     two_arm_exp_block
   ]
 }
-
-// Compute the realized reward ahead of time so two-arm sequence is exactly the
-// same between subjects
-
-
-// experiment.push(change_colors);
-// experiment.push(check_id_block);
-// experiment.push(consent_block);
-// experiment.push(welcome_block);
-// experiment.push(instructions_1a_block);
-// experiment.push(alien_1_practice_block);
-// experiment.push(instructions_1b_block);
-// experiment.push(alien_2_practice_block);
-// experiment.push(instructions_1c_block);
-// experiment.push(aliens_practice_block);
-// experiment.push(instructions_1d_block);
-// experiment.push(space_practice_block);
-// experiment.push(instructions_2_block);
-// experiment.push(space_block);
-// experiment.push(save_data_block);
-// experiment.push(check_demographics_block);
-// experiment.push(save_subinfo_block);
-// experiment.push(debriefing_block);
-// experiment.push(score_block);
-// experiment.push(change_colors_back);
-// experiment.push(end_block);
-
-// var border_side = -1;
-// var alien_1_practice_choice = {
-//   type: jsPsychHtmlKeyboardResponse,
-//   stimulus: alien_1_practice_html(1),
-//   choices: ['f','j'],
-//   prompt: 'Press F or J to select an alien',
-//   on_finish: function(trial) {
-//     if (trial.response === 'f') {
-//       border_side = 0;
-//     } else if (trial.response === 'j') {
-//       border_side = 1;
-//     }
-//   }
-// }
-//
-// var alien_1_practice_response = {
-//   type: jsPsychHtmlKeyboardResponse,
-//   stimulus: alien_1_practice_html(1,1),
-//   choices: [],
-//   // trial_duration: 500
-//   prompt: ''
-// }
-//
-// timeline.push(alien_1_practice_choice)
-// timeline.push(alien_1_practice_response)
-
-// var alien_1_practice_block = {
-// 	type: "space-daw-alien-stim",
-// 	choices: "space",
-// 	p: function() {
-// 		return p_alien_1_ps.splice(0,1)
-// 	},
-// 	timing_post_trial: 0,
-// 	nrtrials: 5,
-// };

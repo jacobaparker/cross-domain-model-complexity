@@ -19,6 +19,7 @@
     <script src="jspsych/plugin-image-keyboard-response.js"></script>
     <script src="jspsych/plugin-html-keyboard-response.js"></script>
     <script src="jspsych/plugin-image-button-response.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
     <script src="jspsych/plugin-preload.js"></script>
     <script src="jspsych/plugin-survey-multi-choice.js"></script>
     <script src="jspsych/plugin-survey-text.js"></script>
@@ -32,7 +33,21 @@
   <script>
     // meta experiment variables
     var pavlovia_flag = false;
-    var test_mode = 2;
+    var test_mode = 1;
+
+    if (test_mode < 1) {
+      var beads_exp_ntrials = 250;
+      var beads_prac_ntrials = 20;
+
+      var two_arm_exp_ntrials = 125;
+      var two_arm_prac_ntrials = 20;
+    } else {
+      var beads_exp_ntrials = 10;
+      var beads_prac_ntrials = 5;
+
+      var two_arm_exp_ntrials = 10;
+      var two_arm_prac_ntrials = 5;
+    }
 
     // initialize jspysch
     var jsPsych = initJsPsych({

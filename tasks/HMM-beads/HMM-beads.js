@@ -1,28 +1,49 @@
 var FreshBlock = 'on';
 var ChoiceDirection = '';
 var PreviousTrialIndex = 0;
-var RelativeTrialIndex = 1;
 var Correct = 0;
 var TaskType = '';
 var Block_Index = 0;
 var instruction_picker = 1;
-var beads_path = './tasks/HMM-beads/'
-
-// LOOK AT WHAT ALEX DID FOR TRIAL FEEDBACK
+var beads_path = './tasks/HMM-beads/';
+var beads_quiz_correct = false;
+var beads_practice_file = './tasks/HMM-beads/stimuli/low_hazard_H10.json';
+var beads_lowH_file = './tasks/HMM-beads/stimuli/low_hazard_H01.json';
+var beads_highH_file = './tasks/HMM-beads/stimuli/high_hazard_H99.json';
+var beads_trial_num = 1;
 
 // Session order - uncomment the order you want
-var All_Type = ['Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual'];
+// var All_Type = ['Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual'];
 //var All_Type = ['Low_HMMActual','High_HMMActual','Low_MMActual','High_MMActual']
-var Block_Type = All_Type[Block_Index];
+// var Block_Type = All_Type[Block_Index];
 
 //script_number = Math.floor(Math.random() * 90) + 1;
 // var script_picker = 17
 
-Low_HMMData = $ .get(beads_path + `stimuli/low_hazard_HMM10/low_hazard_HMM_Actual.csv`, function(){
-    Low_HMMActual = Papa.parse(Low_HMMData.responseText, {
-        dynamicTyping: true
-    });
+if (Math.random() >= 0.5) {
+  var block_order = ['practice','lowH','highH'];
+} else {
+  var block_order = ['practice','highH','lowH'];
+}
+var Block_Type = block_order[Block_Index];
+
+readTextFile(beads_practice_file, function(text){
+  beads_prac_data = JSON.parse(text);
 });
+
+readTextFile(beads_lowH_file, function(text){
+  beads_lowH_data = JSON.parse(text);
+});
+
+readTextFile(beads_highH_file, function(text){
+  beads_highH_data = JSON.parse(text);
+});
+
+// Low_HMMData = $ .get(beads_path + `stimuli/low_hazard_HMM10/low_hazard_HMM_Actual.csv`, function(){
+//     Low_HMMActual = Papa.parse(Low_HMMData.responseText, {
+//         dynamicTyping: true
+//     });
+// });
 
 
 function centered_message(message) {
@@ -80,6 +101,14 @@ var beads_images = ["tutorial/tutorial-01.png",
 "Images/WhiteBeadChoiceMM.png",
 "Images/WhiteBeadChoiceWrong.png",
 "Images/WhiteBeadChoiceWrongMM.png",
+"Images/BlackBall.png",
+"Images/WhiteBall.png",
+"Images/BlackJar_HMM.png",
+"Images/WhiteJar_HMM.png",
+"Images/NewTrialScreen.png",
+"Instructions/Slide1.png",
+"Instructions/Slide2.png",
+"Instructions/Slide3.png"
 ];
 
 for (let jj = 0; jj < beads_images.length; jj++) {
@@ -108,7 +137,127 @@ var beads_instructions_block1 = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-timeline.push(beads_instructions_block1)
+// timeline.push(beads_instructions_block1)
+
+var beads_quiz1_Q1 = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `<div align=center>Your goal is to predict…?<br><br></div>`,
+  choices: ['The color of the previous bead','The color of the next bead','The jar being selected'],
+  on_finish: function(trial) {
+    if (trial.response === 1) {beads_quiz_correct = true;}
+    else {beads_quiz_correct = false;}
+  }
+}
+
+var beads_quiz1_Q1_wrapper = {
+  timeline: [beads_quiz1_Q1],
+  loop_function: function(trial) {
+    if (beads_quiz_correct) {
+      alert("Correct!");
+      return false;
+    } else {
+      alert("Incorrect, please try again.");
+      return true;
+    }
+  }
+}
+
+var beads_quiz1_Q2 = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `<div align=center>In the jar with mostly white beads, there are ___% white beads and ___% black beads?<br><br></div>`,
+  choices: ['50%, 50%','25%, 75%','80%, 20%'],
+  on_finish: function(trial) {
+    if (trial.response === 2) {beads_quiz_correct = true;}
+    else {beads_quiz_correct = false;}
+  }
+}
+
+var beads_quiz1_Q2_wrapper = {
+  timeline: [beads_quiz1_Q2],
+  loop_function: function(trial) {
+    if (beads_quiz_correct) {
+      alert("Correct!");
+      return false;
+    } else {
+      alert("Incorrect, please try again.");
+      return true;
+    }
+  }
+}
+
+var beads_quiz1_Q3 = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `<div align=center>When there is a 1% probability that the jars will switch, the next bead will most likely be drawn from the…<br><br></div>`,
+  choices: ['Same jar','Different jar'],
+  on_finish: function(trial) {
+    if (trial.response === 0) {beads_quiz_correct = true;}
+    else {beads_quiz_correct = false;}
+  }
+}
+
+var beads_quiz1_Q3_wrapper = {
+  timeline: [beads_quiz1_Q3],
+  loop_function: function(trial) {
+    if (beads_quiz_correct) {
+      alert("Correct!");
+      return false;
+    } else {
+      alert("Incorrect, please try again.");
+      return true;
+    }
+  }
+}
+
+var beads_quiz1_Q4 = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `<div align=center>When there is a 99% probability that the jars will switch, the next bead will most likely be drawn from the…<br><br></div>`,
+  choices: ['Same jar','Different jar'],
+  on_finish: function(trial) {
+    if (trial.response === 1) {beads_quiz_correct = true;}
+    else {beads_quiz_correct = false;}
+  }
+}
+
+var beads_quiz1_Q4_wrapper = {
+  timeline: [beads_quiz1_Q4],
+  loop_function: function(trial) {
+    if (beads_quiz_correct) {
+      alert("Correct!");
+      return false;
+    } else {
+      alert("Incorrect, please try again.");
+      return true;
+    }
+  }
+}
+
+var beads_quiz1 = {
+  timeline: [beads_quiz1_Q1_wrapper, beads_quiz1_Q2_wrapper, beads_quiz1_Q3_wrapper, beads_quiz1_Q4_wrapper]
+}
+
+var beads_instructions_block2 = {
+	type: jsPsychInstructions,
+	pages: beads_instructions_2_text(),
+	key_forward: "j",
+	key_backward: "f",
+	show_clickable_nav: true,
+}
+
+var beads_instructions_block3 = {
+	type: jsPsychInstructions,
+	pages: beads_instructions_3_text(),
+	key_forward: "j",
+	key_backward: "f",
+	show_clickable_nav: true,
+}
+
+var beads_instructions_block4 = {
+	type: jsPsychInstructions,
+	pages: beads_instructions_4_text(),
+	key_forward: "j",
+	key_backward: "f",
+	show_clickable_nav: true,
+}
 
 // var beads_test_instr = {
 //   type: jsPsychImageKeyboardResponse,
@@ -202,31 +351,31 @@ LHMM_text = '<p style="font-family:Arial;text-align:center;width:800px;font-size
 
 var beads_load_trial = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: centered_message('<p>Loading episode&hellip;</p>'),
+    stimulus: '',
     choices: [' '],
-    prompt: '',
+    prompt: 'Press SPACEBAR to start.',
     on_start: function(trial) {
-    // script_picker += 1
-        var Block_Type = All_Type[Block_Index];
+        Block_Type = block_order[Block_Index];
 
         switch(Block_Type) {
-            case 'Low_HMMActual':
-                trial.prompt = LHMM_text;
-                break;
+            case 'practice':
+              CurrentBlock = beads_prac_data;
+              TaskType = ''
+              trial.stimulus = `<div align=center>In this practice block, there will be a <b>10% chance</b> that the jar on the next trial will be different from the jar on the current trial.<br><br></div>`
+              break;
+            case 'lowH':
+              CurrentBlock = beads_lowH_data;
+              TaskType = ''
+              trial.stimulus = `<div align=center>In this block, there will be a <b>1% chance</b> that the jar on the next trial will be different from the jar on the current trial.<br><br></div>`
+              break;
+            case 'highH':
+              CurrentBlock = beads_highH_data;
+              TaskType = ''
+              trial.stimulus = `<div align=center>In this block, there will be a <b>99%</b> chance that the jar on the next trial will be different from the jar on the current trial.<br><br></div>`
+              break;
         }
+        beads_trial_num = 0;
     },
-    on_finish: function(trial) {
-        var Block_Type = All_Type[Block_Index]
-
-        switch(Block_Type) {
-            case 'Low_HMMActual':
-            CurrentBlock = Low_HMMActual
-            TaskType = ''
-            break;
-        }
-
-        //jsPsych.setProgressBar(0);
-    }
 };
 
 
@@ -236,37 +385,26 @@ var beads_TrialStart = {
     stimulus: '',
     stimulus_width: 900,
     maintain_aspect_ratio: true,
-    prompt: "<p>Please select a bead color.</p>",
+    prompt: "<p>Use the F or J key to select a color.</p>",
     choices: ['f','j'],
-    // button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-    //                 '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-    //                 '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
-    //                 '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
-    // choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
-    /*
-    button_html: ['<button class="jspsych-btn" style="background-color:black; color:white">%choice%</button>',
-    '<button class="jspsych-btn" style="background-color:black; color:white">%choice%</button>',
-    '<button class="jspsych-btn" style="background-color:white; color:black">%choice%</button>',
-    '<button class="jspsych-btn"style="background-color:white; color:black">%choice%</button>' ],
-    choices: ['Black Bead - LOW Confidence', 'Black Bead - HIGH Confidence', 'White Bead - LOW Confidence', 'White Bead - HIGH Confidence'],
-    */
     on_start: function(trial){
 
         switch(FreshBlock) {
         case 'on':
             trial.stimulus = beads_path + 'Images/NoChoice' + TaskType + '.png';
-            BeadColor = CurrentBlock.data[RelativeTrialIndex][1];
+            BeadColor = CurrentBlock[beads_trial_num].Bead;
+            PreviousBeadColor = 0;
             FreshBlock = 'off';
             break;
         case 'off':
-            BeadColor = CurrentBlock.data[RelativeTrialIndex][1];
-            PreviousBeadColor = CurrentBlock.data[RelativeTrialIndex-1][1];
+            BeadColor = CurrentBlock[beads_trial_num].Bead;
+            PreviousBeadColor = CurrentBlock[beads_trial_num-1].Bead;
 
             switch(PreviousBeadColor) {
-                case 1:
+                case '1':
                     trial.stimulus = beads_path + 'Images/NewTrialBC' + TaskType + '.png';
                     break;
-                case 2:
+                case '2':
                     trial.stimulus = beads_path + 'Images/NewTrialWC'  + TaskType + '.png';
                     break;
             }
@@ -279,6 +417,15 @@ var beads_TrialStart = {
         } else if (trial.response ==='j') {
             ChoiceDirection = '2';
         }
+        jsPsych.data.get().addToLast({
+          block: Block_Type,
+          trial_number: beads_trial_num,
+          jar: CurrentBlock[beads_trial_num].Urn,
+          bead: BeadColor,
+          previous_bead: PreviousBeadColor,
+          choice: ChoiceDirection,
+          correct: ChoiceDirection === BeadColor
+        })
     },
 };
 
@@ -291,7 +438,7 @@ var beads_SubjectChoice = {
     //             '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
     // choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
     choices: [],
-    prompt: "<p>Please select a bead color.</p>",
+    prompt: "<p>Use the F or J key to select a color.</p>",
     stimulus_width: 900,
     maintain_aspect_ratio: true,
     trial_duration: 300,
@@ -314,12 +461,7 @@ var beads_BeadAppears = {
     type: jsPsychImageKeyboardResponse,
     stimulus: '',
     choices: [],
-    // button_html: ['<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-    //             '<button class="jspsych-btn" style="background-color:black; color:white; display:block">%choice%</button>',
-    //             '<button class="jspsych-btn" style="background-color:white; color:black; display:block">%choice%</button>',
-    //             '<button class="jspsych-btn"style="background-color:white; color:black; display:block">%choice%</button>' ],
-    // choices: ['Black Bead - HIGH Confidence', 'Black Bead - LOW Confidence', 'White Bead - HIGH Confidence', 'White Bead - LOW Confidence'],
-    prompt: "<p>Please select a bead color.</p>",
+    prompt: "<p>Use the F or J key to select a color.</p>",
     stimulus_width: 900,
     maintain_aspect_ratio: true,
     trial_duration: 500,
@@ -345,7 +487,7 @@ var beads_BeadAppears = {
                 Correct += 1;
                 break;
         }
-    RelativeTrialIndex += 1;
+    beads_trial_num += 1;
 
     },
     on_finish: function() {
@@ -367,7 +509,6 @@ var beads_reset_trial = {
     },
     on_finish: function(trial){
         FreshBlock = 'on'
-        //RelativeTrialIndex = 1
         Block_Index += 1
         Correct = 0
 
@@ -376,7 +517,7 @@ var beads_reset_trial = {
 
 var beads_training_trials = {
     timeline: [beads_TrialStart,beads_SubjectChoice,beads_BeadAppears],
-    repetitions: 10
+    repetitions: beads_prac_ntrials
 };
 
 var beads_training_block = {
@@ -385,7 +526,7 @@ var beads_training_block = {
 
 var beads_experiment_trials = {
     timeline: [beads_TrialStart,beads_SubjectChoice,beads_BeadAppears],
-    repetitions: 10
+    repetitions: beads_exp_ntrials
 };
 
 var beads_experiment_block = {
@@ -394,12 +535,13 @@ var beads_experiment_block = {
 
 var HMM_beads_task = {
   timeline: [
-    beads_intro_block,
+    beads_instructions_block1,
+    beads_quiz1,
+    beads_instructions_block2,
     beads_training_block,
-    beads_instruction_trial,
+    beads_instructions_block3,
     beads_experiment_block,
-    beads_instruction_trial,
-    beads_instruction_trial,
+    beads_instructions_block4,
     beads_experiment_block
   ]
 }
