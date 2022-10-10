@@ -32,7 +32,7 @@
   <body></body>
   <script>
     // meta experiment variables
-    var pavlovia_flag = false;
+    var pavlovia_flag = true;
     var test_mode = 1;
 
     if (test_mode < 1) {
@@ -66,6 +66,12 @@
         type: "pavlovia",
         command: "init"
       };
+
+      var pavlovia_finish = {
+        type: "pavlovia",
+        command: "finish"
+      };
+
       preload.push(pavlovia_init)
     }
 
@@ -189,6 +195,7 @@
       timeline.push(HMM_beads_task)
     }
     timeline.push(exp_debrief)
+    if (pavlovia_flag) {timeline.push(pavlovia_finish)}
     jsPsych.run(preload.concat(timeline))
   </script>
 
