@@ -1,8 +1,8 @@
 var instructions_1a_text = function(){
-	var instructions = ["<div align=center>Welcome to this HIT!<br><br>Please read all following instructions very carefully.<br><br>It takes some time, but otherwise you will not know what to do.</div>",
-	"<div align=center>In this HIT, you will be taking a spaceship from earth<br> to look for space treasure on two different planets:<br><br><img style='margin:0px auto;display:block;height:200px' src='img/example_planets.png'/></div>",
+	var instructions = [
+	"<div align=center>In this game, you will be taking a spaceship from earth<br> to look for space treasure on two different planets:<br><br><img style='margin:0px auto;display:block;height:200px' src='img/example_planets.png'/></div>",
 	"<div align=center>Each planet has two aliens on it and each alien has its own space treasure mine.<br><br><img style='margin:0px auto;display:block;height:100px' src='img/example_aliens.png'/><br>Once you arrive to each planet, you will ask one of the aliens for space treasure from its mine.</div>",
-	"<div align=justify>These aliens are nice, so if an alien just brought treasure up from the mine, it will share it with you. Space treasure looks like this:<br><br><img style='margin:0px auto;display:block' src='img/treasure.png'/><br>Sometimes, the alien will not bring up any treasure and you'll see an empty circle:<br><br><img style='margin:0px auto;display:block' src='img/noreward.png'/></div>",
+	"<div align=justify>These aliens are nice, so if an alien just brought treasure up from the mine, it will share it with you. Space treasure looks like this:<br><br><img style='margin:0px auto;display:block' src='img/treasure.png'/><br>Sometimes, the alien will not bring up any treasure and you'll see an empty circle:<br><br><img style='background-color: gray;margin:0px auto;display:block' src='img/noreward.png'/></div>",
 	"<div align=justify>If an alien has a good mine, it means it can easily dig up space treasure and it will be very likely to have some to share. It might not have treasure every time you ask, but it will most of the time.<br><br>Another alien might have a bad mine that is hard to dig through at the moment and won't have treasure to share most times you ask.<br><br>At the end of each trial, the space treasure that you earned will be converted to points.<br><Br>Each piece of space treasure will be worth one point.</div>",
 	"<div align=justify>On each planet, you can choose the left alien by pressing the 'F' key and the right alien by pressing the 'J' key. You will then see whether you got treasure.<br><br>Try practicing this a few times. In the following practice phase, always pick the alien that is highlighted.</div>"];
 	return instructions
@@ -381,6 +381,14 @@ class two_arm_full {
     this.trial += 1;
   }
 
+	trial_end_lapse() {
+    this.state1.stim1.reset_carryover()
+    this.state1.stim2.reset_carryover()
+    this.state1.trial_end_lapse()
+    this.state2a.trial_end_lapse()
+    this.state2b.trial_end_lapse()
+  }
+
 }
 
 class two_arm_stim {
@@ -447,7 +455,7 @@ class two_arm_state {
     this.planet = spec.path + spec.color + '_planet.png';
     this.stim1 = new two_arm_stim(spec.color,1,spec.stim1_state,'left',spec.path);
     this.stim2 = new two_arm_stim(spec.color,2, spec.stim2_state,'right',spec.path);
-    if (Math.random() > 0.5) {
+    if (Math.random() >= 0.5) {
       this.stim1.update_side('left');
       this.stim2.update_side('right');
     } else {
@@ -526,7 +534,7 @@ class two_arm_state {
   }
 
   trial_end() {
-    if (Math.random() > 0.5) {
+    if (Math.random() >= 0.5) {
       this.stim1.update_side('left');
       this.stim2.update_side('right');
     } else {
@@ -539,4 +547,18 @@ class two_arm_state {
     this.stim2.update_state(1);
     this.trial += 1;
   }
+
+	trial_end_lapse() {
+		if (Math.random() >= 0.5) {
+      this.stim1.update_side('left');
+      this.stim2.update_side('right');
+    } else {
+      this.stim2.update_side('left');
+      this.stim1.update_side('right');
+    }
+    this.stim1.selected = false;
+    this.stim2.selected = false;
+    this.stim1.update_state(1);
+    this.stim2.update_state(1);
+	}
 }

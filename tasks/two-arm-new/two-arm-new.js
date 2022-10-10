@@ -1,10 +1,61 @@
 var seq_num = 8;
-var seq_file = "./tasks/two-arm-new/stimuli/seq" + String(seq_num) + ".json";
+var seq_file = "./tasks/two-arm-new/stimuli/seq" + String(seq_num) + "_new.json";
 var p_alien_1_ps = [1, 1, 1, 0, 1];
 var p_alien_2_ps = [0, 1, 0, 0, 0];
 var Ntrials_full_exp = two_arm_exp_ntrials;
 var Ntrials_full_prac = two_arm_prac_ntrials;
 var Ntrials_aliens_prac = two_arm_prac_ntrials;
+var two_arm_path = "./tasks/two-arm-new/";
+
+var two_arm_images = [
+  "img/earth_planet.png",
+  "img/earth_stim_1.png",
+  "img/earth_stim_1_deact.png",
+  "img/earth_stim_2.png",
+  "img/earth_stim_2_deact.png",
+  "img/example_aliens.png",
+  "img/example_planets.png",
+  "img/example_rockets.png",
+  "img/green_planet.png",
+  "img/green_stim_1.png",
+  "img/green_stim_1_deact.png",
+  "img/green_stim_1_sad.png",
+  "img/green_stim_2.png",
+  "img/green_stim_2_deact.png",
+  "img/green_stim_2_sad.png",
+  "img/noreward.png",
+  "img/purple_planet.png",
+  "img/purple_stim_1.png",
+  "img/purple_stim_1_deact.png",
+  "img/purple_stim_1_sad.png",
+  "img/purple_stim_2.png",
+  "img/purple_stim_2_deact.png",
+  "img/purple_stim_2_sad.png",
+  "img/red_planet.png",
+  "img/red_stim_1.png",
+  "img/red_stim_1_deact.png",
+  "img/red_stim_1_sad.png",
+  "img/red_stim_2.png",
+  "img/red_stim_2_deact.png",
+  "img/red_stim_2_sad.png",
+  "img/treasure.png",
+  "img/yellow_planet.png",
+  "img/yellow_stim_1.png",
+  "img/yellow_stim_1_deact.png",
+  "img/yellow_stim_1_sad.png",
+  "img/yellow_stim_2.png",
+  "img/yellow_stim_2_deact.png",
+  "img/yellow_stim_2_sad.png"
+];
+for (let jj = 0; jj < two_arm_images.length; jj++) {
+  two_arm_images[jj] = two_arm_path + two_arm_images[jj];
+}
+
+var two_arm_preload = {
+  type: jsPsychPreload,
+	images: two_arm_images
+};
+// preload.push(two_arm_preload)
 
 // IMPLEMENT 2 SEC TIME LIMIT ON FULL TWO ARM
 
@@ -94,6 +145,8 @@ var alien_1_practice_reward = {
     // trial.choices = alien_1_practice.get_response_options()
   },
   on_finish: function(trial) {
+    console.log("test to see")
+    console.log(trial.response)
     alien_1_practice.trial_end()
   }
 }
@@ -381,19 +434,27 @@ var full_spec = {
 };
 var two_arm_exp = new two_arm_full(full_spec);
 
+var lapse_flag = false;
+
 var state1_choice = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: '',
   choices: [],
   prompt: 'Press F or J to select a rocket',
+  trial_duration: 2000,
   on_start: function(trial) {
     two_arm_exp.trial_start()
     trial.stimulus =  two_arm_exp.state1_choice_response_html()
     trial.choices = two_arm_exp.state1.get_response_options()
   },
   on_finish: function(trial) {
-    two_arm_exp.state1.register_response(trial.response)
-    two_arm_exp.register_response_state1(trial.response)
+    if (trial.response === 'j' || trial.response === 'f') {
+      two_arm_exp.state1.register_response(trial.response)
+      two_arm_exp.register_response_state1(trial.response)
+      lapse_flag = false;
+    } else {
+      lapse_flag = true;
+    }
   }
 };
 
@@ -415,14 +476,20 @@ var state2_choice = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: '',
   choices: [],
+  trial_duration: 2000,
   prompt: 'Press F or J to select an alien',
   on_start: function(trial) {
     trial.stimulus =  two_arm_exp.state2_choice_response_html()
     trial.choices = two_arm_exp.state2_get_response_options()
   },
   on_finish: function(trial) {
-    two_arm_exp.register_response_state2(trial.response)
-    two_arm_exp.determine_reward()
+    if (trial.response === 'j' || trial.response === 'f') {
+      two_arm_exp.register_response_state2(trial.response)
+      two_arm_exp.determine_reward()
+      lapse_flag = false;
+    } else {
+      lapse_flag = true;
+    }
   }
 }
 
@@ -463,14 +530,54 @@ var state2_reward = {
   }
 }
 
+var response_lapse = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '<div align=center>Please respond within 2 seconds.<br><br>Trial will now repeat.</div>',
+  response_ends_trial: false,
+  trial_duration: 2000,
+  on_start: function(trial) {
+    two_arm_exp.trial_end_lapse()
+  }
+}
+
+var cond_response_lapse = {
+  timeline: [response_lapse],
+  conditional_function: function() {return lapse_flag}
+}
+
+var post_state2_choice = {
+  timeline: [state2_response, state2_reward],
+  conditional_function: function() {return ! lapse_flag}
+}
+
+var post_state1_choice = {
+  timeline: [state1_response, state2_choice, post_state2_choice, cond_response_lapse],
+  conditional_function: function() {return ! lapse_flag}
+}
+
+var two_arm_exp_trial = {
+  timeline: [state1_choice, post_state1_choice, cond_response_lapse]
+}
+
 var two_arm_exp_block = {
-  timeline: [state1_choice, state1_response, state2_choice, state2_response, state2_reward],
-  repetitions: Ntrials_full_exp
+  // timeline: [state1_choice, state1_response, state2_choice, state2_response, state2_reward],
+  // repetitions: Ntrials_full_exp,
+  timeline: [two_arm_exp_trial],
+  loop_function: function(trial) {return two_arm_exp.trial < Ntrials_full_exp}
 }
 // timeline.push(two_arm_exp_block)
 
+// var two_arm_exp_block = {
+//   timeline: [state1_choice, state1_response, state2_choice, state2_response, state2_reward],
+//   repetitions: Ntrials_full_exp,
+//   loop_function: function(trial) {
+//     if
+//   }
+// }
+
 var two_arm_task = {
   timeline: [
+    two_arm_preload,
     instructions_1a_block,
     alien_1_practice_block,
     instructions_1b_block,
@@ -478,6 +585,7 @@ var two_arm_task = {
     instructions_1c_block,
     aliens_practice_block,
     instructions_1d_block,
+    two_arm_practice_block,
     instructions_2_block,
     two_arm_exp_block
   ]

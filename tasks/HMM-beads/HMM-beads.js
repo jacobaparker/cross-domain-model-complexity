@@ -128,7 +128,7 @@ var beads_preload = {
   type: jsPsychPreload,
 	images: beads_images
 };
-preload.push(beads_preload)
+// preload.push(beads_preload)
 
 var beads_instructions_block1 = {
 	type: jsPsychInstructions,
@@ -535,6 +535,7 @@ var beads_experiment_block = {
 
 var HMM_beads_task = {
   timeline: [
+    beads_preload,
     beads_instructions_block1,
     beads_quiz1,
     beads_instructions_block2,
