@@ -6,6 +6,7 @@ var Ntrials_full_exp = two_arm_exp_ntrials;
 var Ntrials_full_prac = two_arm_prac_ntrials;
 var Ntrials_aliens_prac = two_arm_prac_ntrials;
 var two_arm_path = "./tasks/two-arm-new/";
+var prac_seq_file = "./tasks/two-arm-new/stimuli/seq2_new.json";
 
 var two_arm_images = [
   "img/earth_planet.png",
@@ -61,6 +62,10 @@ var two_arm_preload = {
 
 readTextFile(seq_file, function(text){
   seq_data = JSON.parse(text);
+});
+
+readTextFile(prac_seq_file, function(text){
+  prac_seq_data = JSON.parse(text);
 });
 
 var change_colors = {
@@ -322,7 +327,7 @@ var full_spec = {
   state1_color: 'earth',
   state2a_color: 'green',
   state2b_color: 'yellow',
-  trial_seq: seq_data,
+  trial_seq: prac_seq_data,
   display_score: true
 };
 var two_arm_practice = new two_arm_full(full_spec);

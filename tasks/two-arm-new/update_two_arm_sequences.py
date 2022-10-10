@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-seqnum = 8
+seqnum = 2
 
 tdf = pd.read_csv("stimuli/seq"+str(seqnum)+".csv")
 

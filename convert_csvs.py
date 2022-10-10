@@ -25,6 +25,8 @@ instr_csv = './instructions_spec.csv'
 instr_json = './instructions_spec.json'
 two_arm_csv = './tasks/two-arm-new/stimuli/seq8_new.csv'
 two_arm_json = './tasks/two-arm-new/stimuli/seq8_new.json'
+two_arm_csv2 = './tasks/two-arm-new/stimuli/seq2_new.csv'
+two_arm_json2 = './tasks/two-arm-new/stimuli/seq2_new.json'
 beads_csv1 = './tasks/HMM-beads/stimuli/low_hazard_H10.csv'
 beads_csv2 = './tasks/HMM-beads/stimuli/low_hazard_H01.csv'
 beads_csv3 = './tasks/HMM-beads/stimuli/high_hazard_H99.csv'
@@ -34,6 +36,7 @@ beads_json3 = './tasks/HMM-beads/stimuli/high_hazard_H99.json'
 
 csv_to_json(instr_csv,instr_json)
 csv_to_json(two_arm_csv,two_arm_json)
+csv_to_json(two_arm_csv2,two_arm_json2)
 csv_to_json(beads_csv1,beads_json1)
 csv_to_json(beads_csv2,beads_json2)
 csv_to_json(beads_csv3,beads_json3)
