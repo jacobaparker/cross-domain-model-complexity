@@ -234,6 +234,10 @@ class two_arm_full {
     this.rewarded = 0;
     this.display_score = spec.display_score;
     this.score = 0;
+		this.state1_key = '';
+		this.state2_key = '';
+		this.state1_rt = 0;
+		this.state2_rt = 0;
     var Rw1 = [];
     var Rw2 = [];
     var Rw3 = [];
@@ -293,7 +297,9 @@ class two_arm_full {
     return this.html_wrapper(this.state1.choice_response_html())
   }
 
-  register_response_state1(response) {
+  register_response_state1(response, rt) {
+		this.state1_key = response;
+		this.state1_rt = rt;
     if (this.state1.stim1.choice === response) {
       this.state2_current = Number(this.A1_outcome);
       this.action_current = 0;
@@ -328,7 +334,9 @@ class two_arm_full {
     }
   }
 
-  register_response_state2(response) {
+  register_response_state2(response,rt) {
+		this.state2_key = response;
+		this.state2_rt = rt;
     if (this.state2_current === 0) {
       this.state2a.register_response(response)
     } else if (this.state2_current === 1) {

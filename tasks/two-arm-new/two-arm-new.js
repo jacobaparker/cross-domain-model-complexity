@@ -344,7 +344,7 @@ var state1_choice_prac = {
   },
   on_finish: function(trial) {
     two_arm_practice.state1.register_response(trial.response)
-    two_arm_practice.register_response_state1(trial.response)
+    two_arm_practice.register_response_state1(trial.response, trial.rt)
   }
 };
 
@@ -372,7 +372,7 @@ var state2_choice_prac = {
     trial.choices = two_arm_practice.state2_get_response_options()
   },
   on_finish: function(trial) {
-    two_arm_practice.register_response_state2(trial.response)
+    two_arm_practice.register_response_state2(trial.response, trial.rt)
     two_arm_practice.determine_reward()
   }
 }
@@ -408,7 +408,11 @@ var state2_reward_prac = {
       state1_action: two_arm_practice.action_current+1,
       state2_visited: two_arm_practice.state2_current+1,
       choice: two_arm_practice.choice,
-      rewarded: two_arm_practice.rewarded
+      rewarded: two_arm_practice.rewarded,
+      state1_key: two_arm_practice.state1_key,
+      state2_key: two_arm_practice.state2_key,
+      state1_rt: two_arm_practice.state1_rt,
+      state2_rt: two_arm_practice.state2_rt
     });
     two_arm_practice.trial_end()
   }
@@ -455,7 +459,7 @@ var state1_choice = {
   on_finish: function(trial) {
     if (trial.response === 'j' || trial.response === 'f') {
       two_arm_exp.state1.register_response(trial.response)
-      two_arm_exp.register_response_state1(trial.response)
+      two_arm_exp.register_response_state1(trial.response, trial.rt)
       lapse_flag = false;
     } else {
       lapse_flag = true;
@@ -489,7 +493,7 @@ var state2_choice = {
   },
   on_finish: function(trial) {
     if (trial.response === 'j' || trial.response === 'f') {
-      two_arm_exp.register_response_state2(trial.response)
+      two_arm_exp.register_response_state2(trial.response, trial.rt)
       two_arm_exp.determine_reward()
       lapse_flag = false;
     } else {
@@ -529,7 +533,11 @@ var state2_reward = {
       state1_action: two_arm_exp.action_current+1,
       state2_visited: two_arm_exp.state2_current+1,
       choice: two_arm_exp.choice,
-      rewarded: two_arm_exp.rewarded
+      rewarded: two_arm_exp.rewarded,
+      state1_key: two_arm_exp.state1_key,
+      state2_key: two_arm_exp.state2_key,
+      state1_rt: two_arm_exp.state1_rt,
+      state2_rt: two_arm_exp.state2_rt
     });
     two_arm_exp.trial_end()
   }
