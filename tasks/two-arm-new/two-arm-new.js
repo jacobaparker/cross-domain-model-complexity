@@ -58,8 +58,6 @@ var two_arm_preload = {
 };
 // preload.push(two_arm_preload)
 
-// IMPLEMENT 2 SEC TIME LIMIT ON FULL TWO ARM
-
 readTextFile(seq_file, function(text){
   seq_data = JSON.parse(text);
 });
