@@ -498,7 +498,7 @@ var beads_experiment_block = {
 
 var HMM_beads_task = {
   timeline: [
-    beads_preload,
+    // beads_preload,
     beads_instructions_block1,
     beads_quiz1,
     beads_instructions_block2,
