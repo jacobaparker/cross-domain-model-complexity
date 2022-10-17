@@ -76,52 +76,52 @@
       preload.push(pavlovia_init)
     }
 
-    if (test_mode <= 1) {
-      // consent form
-      var check_consent = function(elem) {
-        if (document.getElementById('consent_checkbox').checked) {
-          return true;
-        }
-        else {
-          alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
-          return false;
-        }
+
+    // consent form
+    var check_consent = function(elem) {
+      if (document.getElementById('consent_checkbox').checked) {
+        return true;
+      }
+      else {
+        alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
         return false;
-      };
+      }
+      return false;
+    };
 
-      var consent = {
-        type: jsPsychExternalHtml,
-        url: "consent.html",
-        cont_btn: "start",
-        check_fn: check_consent
-      };
+    var consent = {
+      type: jsPsychExternalHtml,
+      url: "consent.html",
+      cont_btn: "start",
+      check_fn: check_consent
+    };
 
-      // survey stuff
-      var Gender_options = ["Male", "Female", "Transgender Male", "Transgender Female", "Non-binary", "Agender", "Gender not listed", "Do Not Wish To Say"];
-      var Ethnicity_options = ["American Indian or Alaskan Native","Asian","Black or African American","Native Hawaiian or Pacific Islander","White","Hispanic or Latino","Other","Do Not Wish to Respond"];
+    // survey stuff
+    var Gender_options = ["Male", "Female", "Transgender Male", "Transgender Female", "Non-binary", "Agender", "Gender not listed", "Do Not Wish To Say"];
+    var Ethnicity_options = ["American Indian or Alaskan Native","Asian","Black or African American","Native Hawaiian or Pacific Islander","White","Hispanic or Latino","Other","Do Not Wish to Respond"];
 
-      var demographics = {
-        type: jsPsychSurveyMultiChoice,
-        questions: [{prompt:"Gender Identity:", options: Gender_options, required:true,},
-        {prompt:"Ethnicity:", options: Ethnicity_options, required:true}]
-      };
+    var demographics = {
+      type: jsPsychSurveyMultiChoice,
+      questions: [{prompt:"Gender Identity:", options: Gender_options, required:true,},
+      {prompt:"Ethnicity:", options: Ethnicity_options, required:true}]
+    };
 
-      var age = {
-        type: jsPsychSurveyText,
-        questions: [{prompt: "How old are you?"}],
-        post_trial_gap: 100
-      };
+    var age = {
+      type: jsPsychSurveyText,
+      questions: [{prompt: "How old are you?"}],
+      post_trial_gap: 100
+    };
 
-      var ProlificID = {
-        type: jsPsychSurveyText,
-        questions: [{prompt: "Please Enter your Prolific ID"}],
-        post_trial_gap: 100
-      };
+    var ProlificID = {
+      type: jsPsychSurveyText,
+      questions: [{prompt: "Please Enter your Prolific ID"}],
+      post_trial_gap: 100
+    };
 
-      var consent_survey_block = {
-        timeline: [consent, demographics, age, ProlificID]
-      };
-    }
+    var consent_survey_block = {
+      timeline: [consent, demographics, age, ProlificID]
+    };
+
 
     // instruction block
     // var instruction_block1 = instruction_engine(1,3,"./instructions_spec.json","./instructions");
@@ -180,7 +180,9 @@
   <!-- run experiment -->
   <script>
 
-    timeline.push(consent_survey_block)
+    if (test_mode <= 1) {
+      timeline.push(consent_survey_block)
+    }
     timeline.push(exp_instructions_1)
     if (Math.random() >= 0.5) {
       timeline.push(exp_instructions_hmm_beads)
