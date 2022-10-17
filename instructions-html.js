@@ -1,5 +1,6 @@
 var exp_instructions_text_1 = function() {
   var html_arr = [
+    `<div align=center>Thank you for choosing to complete this study!<br><br>In this experiment, you will complete two brief games that will require you to make decisions under changing and uncertain conditions.<br><br>In one, you will see black or white beads being drawn from one of two jars. Your goal will be to predict the color of the bead on the next draw.<br><br>In the other, you will play a game in which you fly spaceships to different planets to get space treasure.<br><br></div>`,
     `<div align=center>The first game you will be playing is...<br><br></div>`,
   ];
   return html_arr
