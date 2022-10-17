@@ -89,7 +89,8 @@ for (let jj = 0; jj < beads_images.length; jj++) {
 
 var beads_preload = {
   type: jsPsychPreload,
-	images: beads_images
+	images: beads_images,
+  show_detailed_errors: true
 };
 // preload.push(beads_preload)
 
@@ -498,7 +499,7 @@ var beads_experiment_block = {
 
 var HMM_beads_task = {
   timeline: [
-    // beads_preload,
+    beads_preload,
     beads_instructions_block1,
     beads_quiz1,
     beads_instructions_block2,
