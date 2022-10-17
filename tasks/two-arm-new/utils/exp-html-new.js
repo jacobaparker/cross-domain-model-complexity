@@ -354,7 +354,6 @@ class two_arm_full {
       this.choice = this.state2b.choice+2;
       this.rewarded = this.state2b.rewarded;
     }
-    console.log(this.rewarded)
   }
 
   update_alien_states() {
@@ -366,7 +365,6 @@ class two_arm_full {
   }
 
   update_score() {
-    console.log(this.rewarded)
     this.score += this.rewarded;
   }
 

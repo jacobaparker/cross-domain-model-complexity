@@ -148,8 +148,6 @@ var alien_1_practice_reward = {
     // trial.choices = alien_1_practice.get_response_options()
   },
   on_finish: function(trial) {
-    console.log("test to see")
-    console.log(trial.response)
     alien_1_practice.trial_end()
   }
 }

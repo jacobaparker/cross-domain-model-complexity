@@ -68,10 +68,10 @@ var beads_images = [
 "Images/WhiteBall.png",
 "Images/BlackJar_HMM.png",
 "Images/WhiteJar_HMM.png",
-"Images/NewTrialScreen.png",
-"Instructions/Slide1.jpg",
-"Instructions/Slide2.jpg",
-"Instructions/Slide3.jpg"
+"Images/NewTrialScreen.PNG",
+"instructions/Slide1.jpg",
+"instructions/Slide2.jpg",
+"instructions/Slide3.jpg"
 ];
 
 for (let jj = 0; jj < beads_images.length; jj++) {
@@ -222,13 +222,6 @@ var beads_instructions_block4 = {
 	key_backward: "f",
 	show_clickable_nav: true,
 }
-
-// var beads_test_instr = {
-//   type: jsPsychImageKeyboardResponse,
-//   stimulus: beads_path + 'instructions/Slide1.PNG',
-//   choices: [' ']
-// }
-// timeline.push(beads_test_instr)
 
 var beads_instruction_trial = {
   type: jsPsychImageKeyboardResponse,
