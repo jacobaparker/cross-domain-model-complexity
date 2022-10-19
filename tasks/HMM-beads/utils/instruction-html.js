@@ -19,14 +19,14 @@ var beads_instructions_1_text = function() {
 
 var beads_instructions_2_text = function() {
   var html_arr = [
-    `<div align=justify><b>You will start with a practice block of 10 trials.</b><br><br>Remember:<br><ul><li>The jar on the left contains <b>80% black beads and 20% white beads</b>.</li><li>The jar on the right contains <b>20% black beads and 80% white beads</b>.</li></ul><br>The best strategy to predict the <b>NEXT</b> bead is to predict the jar the next bead will come from.<br><br></div>`,
+    `<div align=justify><b>You will start with a short practice block of 20 trials.</b><br><br>Remember:<br><ul><li>The jar on the left contains <b>80% black beads and 20% white beads</b>.</li><li>The jar on the right contains <b>20% black beads and 80% white beads</b>.</li></ul><br>The best strategy to predict the <b>NEXT</b> bead is to predict the jar the next bead will come from.<br><br></div>`,
   ];
   return html_arr
 }
 
 var beads_instructions_3_text = function() {
   var html_arr = [
-    `<div align=center><b>You will now begin the main block (1/2).</b><br><br></div>`
+    `<div align=center><b>You will now begin the main block (1/2).</b><br><br>The first block will take approximately XX minutes.<br><br></div>`
   ];
   return html_arr
 }
@@ -35,7 +35,7 @@ var beads_instructions_4_text = function() {
   var html_arr = [
     `<div align=center>You have finished the first block!<br><br>Please feel free to take a break before starting the next block.<br><br></div>`,
     `<div align=justify><b>As a reminder:</b><br><br><ul><li>The jar on the left contains <b>80% black beads and 20% white beads</b>.</li><li>The jar on the right contains <b>20% black beads and 80% white beads</b>.</li></ul><br>The best strategy to predict the <b>NEXT</b> bead is to predict the jar the next bead will come from.<br><br></div>`,
-    `<div align=center><b>You will now begin the second block (2/2).</b><br><br></div>`
+    `<div align=center><b>You will now begin the final block (2/2).</b><br><br>The final block will take approximately XX minutes.<br><br></div>`
   ];
   return html_arr
 }
