@@ -34,7 +34,7 @@
   <script>
     // meta experiment variables
     var pavlovia_flag = true;
-    var test_mode = 0;
+    var test_mode = 1;
 
     if (test_mode < 1) {
       var beads_exp_ntrials = 500;
@@ -91,7 +91,7 @@
 
     var consent = {
       type: jsPsychExternalHtml,
-      url: "consent.html",
+      url: "new_consent.html",
       cont_btn: "start",
       check_fn: check_consent
     };

@@ -30,7 +30,7 @@ var instructions_1d_text = function(){
 
 var instructions_2_text = function(){
 	var instructions_2 = ["<div align=justify>Ok, you've finished all practice phases. In the real game, you will find new planets, new aliens and new mines, but the rules and the spaceships will be the same.<br><br>Let's review everything we've learned and then begin playing.<br><br>Remember, you want to find as much space treasure as you can by flying to planets and asking an alien to mine for you. The chance that an alien can share space treasure with you changes slowly over time, so you need to concentrate and be flexible to keep track of which spaceships and aliens are good right now.</div>",
-	"<div align=justify>How much bonus money you make is based on how much space treasure you find. You will get a bonus payment of 1 cent for every point you earn. On average people win about $0.75, and some have won more than $1.00.<br><br>The game lasts for 125 trials and you will have two seconds for each choice, and that takes most people about 20 minutes. Good luck!</div>"];
+	"<div align=justify><b>How much bonus money you make is based on how much space treasure you find.</b> You will get a bonus payment of 1 cent for every point you earn. On average people win about <b>$0.75</b>, and some have won around <b>$1.00</b>.<br><br>The game lasts for about 8 minutes and you will have two seconds for each choice. Good luck!</div>"];
 	return instructions_2
 }
 
