@@ -36,7 +36,7 @@ var instructions_2_text = function(){
 
 var two_arm_debrief_text = function(score) {
 	var html_arr = [
-    `<div align=center>Congrats! You have finished the space treasure game.<br><br>You found ` + score + `% pieces of space treasure.<br><br>You won $` + (score/100).toFixed(2) + ` !<br><br></div>`
+    `<div align=center>Congrats! You have finished the space treasure game.<br><br>You found ` + score + ` pieces of space treasure.<br><br>You won $` + (score/100).toFixed(2) + ` !<br><br></div>`
   ]
   return html_arr
 }

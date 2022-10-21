@@ -188,11 +188,12 @@
 
     var exp_debrief = {
       type: jsPsychInstructions,
-      pages: exp_debrief_text(total_bonus),
+      pages: [],
       key_forward: "j",
     	key_backward: "f",
     	show_clickable_nav: true,
-      on_finish: function(trial) {
+      on_start: function(trial) {
+        trial.pages = exp_debrief_text(total_bonus);
         jsPsych.data.get().addToLast({
           total_bonus: total_bonus,
         });
