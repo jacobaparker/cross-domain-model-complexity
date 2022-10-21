@@ -589,7 +589,7 @@ var two_arm_debrief_block = {
 	key_forward: "j",
 	key_backward: "f",
 	show_clickable_nav: true,
-  on_finish: = function(trial) {
+  on_finish: function(trial) {
     var two_arm_bonus = (two_arm_exp.score/100).toFixed(2);
     total_bonus += two_arm_bonus;
     jsPsych.data.get().addToLast({
@@ -610,6 +610,7 @@ var two_arm_task = {
     instructions_1d_block,
     two_arm_practice_block,
     instructions_2_block,
-    two_arm_exp_block
+    two_arm_exp_block,
+    two_arm_debrief_block
   ]
 }

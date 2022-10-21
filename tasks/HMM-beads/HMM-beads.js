@@ -475,7 +475,7 @@ var beads_reset_trial = {
           break;
 
         case 'highH':
-          var highH_score = Correct:
+          var highH_score = Correct;
           beads_total_score += highH_score;
           jsPsych.data.get().addToLast({
             highH_score: highH_score
