@@ -28,8 +28,9 @@ var exp_instructions_text_two_arm = function() {
   return html_arr
 }
 
-var exp_debrief_text = function() {
+var exp_debrief_text = function(bonus) {
   var html_arr = [
+    `<div align=center>Congrats! You have finished both games.<br><br>You won $` + bonus + ` across both games!<br><br></div>`,
     `<div align=center>Thank you for completing this experiment! Your participation is a valuable contribution to our research.<br><br>We are studying the complexity of the decision-making strategies people use under different contexts. The two games you played required you to rely on different types of information and make different types of decisions.<br><br>By asking participants to complete these two distinct games, we aim to determine whether people use similarly complex decision-making strategies across tasks even when they must use different types of strategies.<br><br>`
   ];
   return html_arr

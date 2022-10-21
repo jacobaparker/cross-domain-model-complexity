@@ -11,6 +11,7 @@ var beads_practice_file = './tasks/HMM-beads/stimuli/low_hazard_H10.json';
 var beads_lowH_file = './tasks/HMM-beads/stimuli/low_hazard_H01.json';
 var beads_highH_file = './tasks/HMM-beads/stimuli/high_hazard_H99.json';
 var beads_trial_num = 1;
+var beads_total_score = 0;
 
 // Session order - uncomment the order you want
 // var All_Type = ['Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual'];
@@ -92,7 +93,6 @@ var beads_preload = {
 	images: beads_images,
   show_detailed_errors: true
 };
-// preload.push(beads_preload)
 
 var beads_instructions_block1 = {
 	type: jsPsychInstructions,
@@ -462,13 +462,29 @@ var beads_reset_trial = {
     choices: [' '],
     prompt: '',
     on_start: function(trial){
-        trial.prompt = '<p style="height:800px;width:800px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-weight:normal;font-family:Arial;font-size:20px">&hellip;end of block. Your score in this block was: ' + Correct + ' <br> Press SPACEBAR to continue.'
+        trial.prompt = '<p style="height:800px;width:800px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-weight:normal;font-family:Arial;font-size:20px">&hellip;end of block. You predicted ' + (Correct*100/beads_exp_ntrials).toFixed(2) + '% of beads correctly for this block.<br><br> Press SPACEBAR to continue.'
     },
     on_finish: function(trial){
-        FreshBlock = 'on'
-        Block_Index += 1
-        Correct = 0
+      switch(Block_Type) {
+        case 'lowH':
+          var lowH_score = Correct;
+          beads_total_score += lowH_score;
+          jsPsych.data.get().addToLast({
+            lowH_score: lowH_score
+          });
+          break;
 
+        case 'highH':
+          var highH_score = Correct:
+          beads_total_score += highH_score;
+          jsPsych.data.get().addToLast({
+            highH_score: highH_score
+          });
+          break;
+      }
+      FreshBlock = 'on'
+      Block_Index += 1
+      Correct = 0
     }
 };
 
@@ -490,6 +506,18 @@ var beads_experiment_block = {
   timeline: [beads_load_trial, beads_experiment_trials, beads_reset_trial]
 }
 
+var beads_debrief_block = {
+	type: jsPsychInstructions,
+	pages: beads_instructions_debrief_text(beads_total_score),
+	key_forward: "j",
+	key_backward: "f",
+	show_clickable_nav: true,
+  on_finish: function(trial) {
+    var beads_bonus = Math.ceil(beads_total_score/(beads_exp_ntrials*2));
+    total_bonus += beads_bonus;
+  }
+}
+
 var HMM_beads_task = {
   timeline: [
     beads_preload,
@@ -500,6 +528,7 @@ var HMM_beads_task = {
     beads_instructions_block3,
     beads_experiment_block,
     beads_instructions_block4,
-    beads_experiment_block
+    beads_experiment_block,
+    beads_debrief_block
   ]
 }

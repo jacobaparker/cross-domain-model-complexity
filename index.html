@@ -34,7 +34,10 @@
   <script>
     // meta experiment variables
     var pavlovia_flag = true;
+    var prolific_flag = false;
+    var prolific_completion_link = '';
     var test_mode = 1;
+    var total_bonus = 0;
 
     if (test_mode < 1) {
       var beads_exp_ntrials = 500;
@@ -43,23 +46,42 @@
       var two_arm_exp_ntrials = 125;
       var two_arm_prac_ntrials = 20;
     } else {
-      var beads_exp_ntrials = 10;
+      var beads_exp_ntrials = 12;
       var beads_prac_ntrials = 5;
 
-      var two_arm_exp_ntrials = 10;
+      var two_arm_exp_ntrials = 12;
       var two_arm_prac_ntrials = 5;
     }
 
     // initialize jspysch
-    var jsPsych = initJsPsych({
-      on_finish: function() {
-        jsPsych.data.displayData();
-      }
-    });
+    if (prolific_flag) {
+      var jsPsych = initJsPsych({
+        on_finish: function(){
+          // automatically redirect to prolific upon completion
+          window.location = prolific_completion_link
+        }
+      });
+
+      // capture info from Prolific
+      var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+      var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+      var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
+      jsPsych.data.addProperties({
+        subject_id: subject_id,
+        study_id: study_id,
+        session_id: session_id
+      });
+    } else {
+      var jsPsych = initJsPsych({
+        on_finish: function() {
+          jsPsych.data.displayData();
+        }
+      });
+    }
 
     // create jspsych variables
     var timeline = [];
-    var preload = [];
 
     // if pavlovia_flag is true, init connection with pavlovia.org
     if (pavlovia_flag) {
@@ -73,7 +95,7 @@
         command: "finish"
       };
 
-      preload.push(pavlovia_init)
+      timeline.push(pavlovia_init)
     }
 
 
@@ -166,10 +188,15 @@
 
     var exp_debrief = {
       type: jsPsychInstructions,
-      pages: exp_debrief_text(),
+      pages: exp_debrief_text(total_bonus),
       key_forward: "j",
     	key_backward: "f",
     	show_clickable_nav: true,
+      on_finish: function(trial) {
+        jsPsych.data.get().addToLast({
+          total_bonus: total_bonus,
+        });
+      }
     };
   </script>
 
@@ -199,7 +226,7 @@
     }
     timeline.push(exp_debrief)
     if (pavlovia_flag) {timeline.push(pavlovia_finish)}
-    jsPsych.run(preload.concat(timeline))
+    jsPsych.run(timeline)
   </script>
 
 </html>
