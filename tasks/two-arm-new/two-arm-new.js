@@ -585,11 +585,12 @@ var two_arm_exp_block = {
 
 var two_arm_debrief_block = {
 	type: jsPsychInstructions,
-	pages: two_arm_debrief_text(two_arm_exp.score),
+	pages: [],
 	key_forward: "j",
 	key_backward: "f",
 	show_clickable_nav: true,
-  on_finish: function(trial) {
+  on_start: function(trial) {
+    trial.pages = two_arm_debrief_text(two_arm_exp.score);
     var two_arm_bonus = (two_arm_exp.score/100).toFixed(2);
     total_bonus += two_arm_bonus;
     jsPsych.data.get().addToLast({

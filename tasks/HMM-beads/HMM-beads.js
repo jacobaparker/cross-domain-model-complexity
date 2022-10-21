@@ -12,6 +12,7 @@ var beads_lowH_file = './tasks/HMM-beads/stimuli/low_hazard_H01.json';
 var beads_highH_file = './tasks/HMM-beads/stimuli/high_hazard_H99.json';
 var beads_trial_num = 1;
 var beads_total_score = 0;
+var current_ntrials = beads_prac_ntrials;
 
 // Session order - uncomment the order you want
 // var All_Type = ['Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual', 'Low_HMMActual'];
@@ -317,16 +318,19 @@ var beads_load_trial = {
         switch(Block_Type) {
             case 'practice':
               CurrentBlock = beads_prac_data;
+              current_ntrials = beads_prac_ntrials;
               TaskType = ''
               trial.stimulus = `<div align=center>In this practice block, there will be a <b>10% chance</b> that the jar on the next trial will be different from the jar on the current trial.<br><br></div>`
               break;
             case 'lowH':
               CurrentBlock = beads_lowH_data;
+              current_ntrials = beads_exp_ntrials;
               TaskType = ''
               trial.stimulus = `<div align=center>In this block, there will be a <b>1% chance</b> that the jar on the next trial will be different from the jar on the current trial.<br><br></div>`
               break;
             case 'highH':
               CurrentBlock = beads_highH_data;
+              current_ntrials = beads_exp_ntrials;
               TaskType = ''
               trial.stimulus = `<div align=center>In this block, there will be a <b>99%</b> chance that the jar on the next trial will be different from the jar on the current trial.<br><br></div>`
               break;
@@ -462,7 +466,7 @@ var beads_reset_trial = {
     choices: [' '],
     prompt: '',
     on_start: function(trial){
-        trial.prompt = '<p style="height:800px;width:800px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-weight:normal;font-family:Arial;font-size:20px">&hellip;end of block. You predicted ' + (Correct*100/beads_exp_ntrials).toFixed(2) + '% of beads correctly for this block.<br><br> Press SPACEBAR to continue.'
+        trial.prompt = '<p style="height:800px;width:800px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-weight:normal;font-family:Arial;font-size:20px">&hellip;end of block. You predicted ' + (Correct*100/current_ntrials).toFixed(2) + '% of beads correctly for this block.<br><br> Press SPACEBAR to continue.'
     },
     on_finish: function(trial){
       switch(Block_Type) {
@@ -508,12 +512,13 @@ var beads_experiment_block = {
 
 var beads_debrief_block = {
 	type: jsPsychInstructions,
-	pages: beads_debrief_block_text(beads_total_score),
+	pages: [],
 	key_forward: "j",
 	key_backward: "f",
 	show_clickable_nav: true,
-  on_finish: function(trial) {
-    var beads_bonus = Math.ceil(beads_total_score/(beads_exp_ntrials*2));
+  on_start: function(trial) {
+    var beads_bonus = (Math.ceil(beads_total_score*100/(beads_exp_ntrials*2))/100).toFixed(2);
+    trial.pages = beads_debrief_block_text(beads_total_score, beads_bonus);
     total_bonus += beads_bonus;
   }
 }

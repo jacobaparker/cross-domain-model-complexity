@@ -41,9 +41,9 @@ var beads_instructions_4_text = function() {
   return html_arr
 }
 
-var beads_debrief_block_text = function(score) {
+var beads_debrief_block_text = function(score, bonus) {
   var html_arr = [
-    `<div align=center>Congrats! You have finished the beads prediction game.<br><br>You predicted ` + (score*100/(beads_exp_ntrials*2)).toFixed(2) + `% of beads correctly.<br><br>You won $` + Math.ceil(score/(beads_exp_ntrials*2)) + ` !<br><br></div>`
+    `<div align=center>Congrats! You have finished the beads prediction game.<br><br>You predicted ` + (score/beads_exp_ntrials*2).toFixed(2) + `% of beads correctly.<br><br>You won $` + bonus + ` cents!<br><br></div>`
   ]
   return html_arr
 }
