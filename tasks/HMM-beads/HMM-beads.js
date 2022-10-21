@@ -508,7 +508,7 @@ var beads_experiment_block = {
 
 var beads_debrief_block = {
 	type: jsPsychInstructions,
-	pages: beads_instructions_debrief_text(beads_total_score),
+	pages: beads_debrief_block_text(beads_total_score),
 	key_forward: "j",
 	key_backward: "f",
 	show_clickable_nav: true,
