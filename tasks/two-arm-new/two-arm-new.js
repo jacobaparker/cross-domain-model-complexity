@@ -591,7 +591,7 @@ var two_arm_debrief_block = {
 	show_clickable_nav: true,
   on_start: function(trial) {
     trial.pages = two_arm_debrief_text(two_arm_exp.score);
-    var two_arm_bonus = (two_arm_exp.score/100).toFixed(2);
+    var two_arm_bonus = two_arm_exp.score/100;
     total_bonus += two_arm_bonus;
     jsPsych.data.get().addToLast({
       two_arm_score: two_arm_exp.score,

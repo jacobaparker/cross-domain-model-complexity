@@ -517,7 +517,7 @@ var beads_debrief_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
   on_start: function(trial) {
-    var beads_bonus = (Math.ceil(beads_total_score*100/(beads_exp_ntrials*2))/100).toFixed(2);
+    var beads_bonus = Math.ceil(beads_total_score*100/(beads_exp_ntrials*2))/100;
     trial.pages = beads_debrief_block_text(beads_total_score, beads_bonus);
     total_bonus += beads_bonus;
   }
