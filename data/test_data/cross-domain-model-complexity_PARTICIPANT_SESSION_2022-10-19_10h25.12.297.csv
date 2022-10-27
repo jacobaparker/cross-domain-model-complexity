@@ -1,0 +1,6 @@
+"trial_type","trial_index","time_elapsed","internal_node_id","rt","url","response","question_order"
+"pavlovia","0","843","0.0-0.0","","","",""
+"external-html","1","31241","0.0-1.0-0.0","30175","consent.html","",""
+"survey-multi-choice","2","37119","0.0-1.0-1.0","5877","","{""Q0"":""Male"",""Q1"":""White""}","[0,1]"
+"survey-text","3","41333","0.0-1.0-2.0","4210","","{""Q0"":""27""}",""
+"survey-text","4","47666","0.0-1.0-3.0","6221","","{""Q0"":""82473777""}",""

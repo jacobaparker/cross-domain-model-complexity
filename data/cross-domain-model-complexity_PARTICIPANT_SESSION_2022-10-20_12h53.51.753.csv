@@ -1,5 +1,0 @@
-"trial_type","trial_index","time_elapsed","internal_node_id","rt","url","response","question_order"
-"pavlovia","0","801","0.0-0.0","","","",""
-"external-html","1","43923","0.0-1.0-0.0","43014","new_consent.html","",""
-"survey-multi-choice","2","47069","0.0-1.0-1.0","3143","","{""Q0"":""Male"",""Q1"":""White""}","[0,1]"
-"survey-text","3","50208","0.0-1.0-2.0","3138","","{""Q0"":""27""}",""
