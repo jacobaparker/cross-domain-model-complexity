@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 # trial parameters
 Ntrials = 125
-Nsequences = 10 # number of trial sequences generated
+Nsequences = 30 # number of trial sequences generated
 
 # reward probabilities and drift parameters
 Rw_prob_pairs = [[0.75, 0.25],[0.6, 0.4]] #initial reward probabilities
@@ -22,7 +22,7 @@ Rw_drift_mean = 0
 trans_probs_A1 = [0.7, 0.3] #transition probabilities from S0 to S1 and S2 by A1
 trans_probs_A2 = [0.3, 0.7] #transition probabilities from S0 to S1 and S2 by A2
 
-for s in range(Nsequences):
+for s in range(10,Nsequences):
 
     ## convenience parameters
     PRw_add = [0,0,0,0]
@@ -86,16 +86,17 @@ for s in range(Nsequences):
     plt.savefig("stimuli/seq" + str(s) + "_rew-prob.png")
 
     # finish this raster plot
-    Rw1_ind = np.nonzero(tdf.Rw1)
-    Rw2_ind = np.nonzero(tdf.Rw2)
-    Rw3_ind = np.nonzero(tdf.Rw3)
-    Rw4_ind = np.nonzero(tdf.Rw4)
+    Rw1_ind = np.array(np.nonzero(tdf.Rw1)).flatten()
+    Rw2_ind = np.array(np.nonzero(tdf.Rw2)).flatten()
+    Rw3_ind = np.array(np.nonzero(tdf.Rw3)).flatten()
+    Rw4_ind = np.array(np.nonzero(tdf.Rw4)).flatten()
 
     fig3, ax3 = plt.subplots(1,1)
-    ax3.scatter(Rw1_ind+1,1*np.ones(len(Rw1_ind)),'k')
-    ax3.scatter(Rw2_ind+1,1*np.ones(len(Rw2_ind)),'k')
-    ax3.scatter(Rw3_ind+1,1*np.ones(len(Rw3_ind)),'k')
-    ax3.scatter(Rw4_ind+1,1*np.ones(len(Rw4_ind)),'k')
+    ax3.scatter(Rw1_ind+1,1*np.ones((Rw1_ind.shape[0])),marker="|")
+    ax3.scatter(Rw2_ind+1,2*np.ones((Rw2_ind.shape[0])),marker="|")
+    ax3.scatter(Rw3_ind+1,3*np.ones((Rw3_ind.shape[0])),marker="|")
+    ax3.scatter(Rw4_ind+1,4*np.ones((Rw4_ind.shape[0])),marker="|")
+    plt.savefig("stimuli/seq"+str(s)+"_rew-actual.png")
 
     ax2 = tdf.plot.scatter(x="Trial",y="S0_A1",c='b')
     tdf.plot.scatter(x="Trial",y="S0_A2",c='orange',ax=ax2)

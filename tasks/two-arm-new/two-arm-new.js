@@ -6,7 +6,18 @@ var Ntrials_full_exp = two_arm_exp_ntrials;
 var Ntrials_full_prac = two_arm_prac_ntrials;
 var Ntrials_aliens_prac = two_arm_prac_ntrials;
 var two_arm_path = "./tasks/two-arm-new/";
-var prac_seq_file = "./tasks/two-arm-new/stimuli/seq2_new.json";
+var prac_seq_file = "./tasks/two-arm-new/stimuli/seq25.json";
+var seq1_file = "./tasks/two-arm-new/stimuli/seq24.json";
+var seq2_file = "./tasks/two-arm-new/stimuli/seq28.json";
+
+// finish adding extra block
+// also reduce beads trial from 500 to 375
+if (Math.random() >= 0.5) {
+  var arm_block_order = ['practice','lowH','highH'];
+} else {
+  var arm_block_order = ['practice','highH','lowH'];
+}
+var Block_Type = block_order[Block_Index];
 
 var two_arm_images = [
   "img/earth_planet.png",
