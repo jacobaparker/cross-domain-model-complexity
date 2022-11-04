@@ -448,13 +448,23 @@ var instructions_2_block = {
 }
 // timeline.push(instructions_2_block)
 
+var instructions_3_block = {
+	type: jsPsychInstructions,
+	pages: instructions_3_text(),
+	key_forward: "j",
+	key_backward: "f",
+	show_clickable_nav: true,
+}
+
 var prep_exp_block = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: '',
   choices: [' '],
   prompt: 'Press SPACE to start.',
   on_start: function(trial){
+    console.log('hi')
     if (seq_num === 1) {
+      console.log('tESTSET')
       var full_spec = {
         path: './tasks/two-arm-new/img/',
         state1_color: 'earth',

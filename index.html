@@ -33,10 +33,10 @@
   <body></body>
   <script>
     // meta experiment variables
-    var pavlovia_flag = true;
-    var prolific_flag = true;
+    var pavlovia_flag = false;
+    var prolific_flag = false;
     var prolific_completion_link = "https://app.prolific.co/submissions/complete?cc=CR3EGLB7";
-    var test_mode = 0;
+    var test_mode = 2;
     var total_bonus = 0;
 
     if (test_mode < 1) {
@@ -213,7 +213,7 @@
       timeline.push(consent_survey_block)
     }
     timeline.push(exp_instructions_1)
-    if (Math.random() >= 0.5) {
+    if (Math.random() >= 1) {
       timeline.push(exp_instructions_hmm_beads)
       timeline.push(HMM_beads_task)
       timeline.push(exp_instructions_2)
