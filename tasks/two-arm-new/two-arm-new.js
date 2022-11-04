@@ -1,5 +1,5 @@
-var seq_num = 8;
-var seq_file = "./tasks/two-arm-new/stimuli/seq" + String(seq_num) + "_new.json";
+// var seq_num = 8;
+// var seq_file = "./tasks/two-arm-new/stimuli/seq" + String(seq_num) + "_new.json";
 var p_alien_1_ps = [1, 1, 1, 0, 1];
 var p_alien_2_ps = [0, 1, 0, 0, 0];
 var Ntrials_full_exp = two_arm_exp_ntrials;
@@ -7,15 +7,20 @@ var Ntrials_full_prac = two_arm_prac_ntrials;
 var Ntrials_aliens_prac = two_arm_prac_ntrials;
 var two_arm_path = "./tasks/two-arm-new/";
 var prac_seq_file = "./tasks/two-arm-new/stimuli/seq25.json";
-var seq1_file = "./tasks/two-arm-new/stimuli/seq24.json";
-var seq2_file = "./tasks/two-arm-new/stimuli/seq28.json";
+// var seq1_file = "./tasks/two-arm-new/stimuli/seq24.json";
+// var seq2_file = "./tasks/two-arm-new/stimuli/seq28.json";
+var seq_num = 1;
 
 // finish adding extra block
 // also reduce beads trial from 500 to 375
 if (Math.random() >= 0.5) {
-  var arm_block_order = ['practice','lowH','highH'];
+  console.log('Seq 24 first, 28 second')
+  var seq1_file = "./tasks/two-arm-new/stimuli/seq24.json";
+  var seq2_file = "./tasks/two-arm-new/stimuli/seq28.json";
 } else {
-  var arm_block_order = ['practice','highH','lowH'];
+  console.log('Seq 28 first, 24 second')
+  var seq2_file = "./tasks/two-arm-new/stimuli/seq24.json";
+  var seq1_file = "./tasks/two-arm-new/stimuli/seq28.json";
 }
 var Block_Type = block_order[Block_Index];
 
@@ -68,8 +73,12 @@ var two_arm_preload = {
 	images: two_arm_images
 };
 
-readTextFile(seq_file, function(text){
-  seq_data = JSON.parse(text);
+readTextFile(seq1_file, function(text){
+  seq1_data = JSON.parse(text);
+});
+
+readTextFile(seq2_file, function(text){
+  seq2_data = JSON.parse(text);
 });
 
 readTextFile(prac_seq_file, function(text){
@@ -439,17 +448,55 @@ var instructions_2_block = {
 }
 // timeline.push(instructions_2_block)
 
-var full_spec = {
-  path: './tasks/two-arm-new/img/',
-  state1_color: 'earth',
-  state2a_color: 'purple',
-  state2b_color: 'red',
-  trial_seq: seq_data,
-  display_score: true
-};
-var two_arm_exp = new two_arm_full(full_spec);
+var prep_exp_block = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [' '],
+  prompt: 'Press SPACE to start.',
+  on_start: function(trial){
+    if (seq_num === 1) {
+      var full_spec = {
+        path: './tasks/two-arm-new/img/',
+        state1_color: 'earth',
+        state2a_color: 'purple',
+        state2b_color: 'red',
+        trial_seq: seq1_data,
+        display_score: true
+      };
+      jsPsych.data.get().addToLast({
+        block_num: seq_num,
+        seq_file: seq1_file
+      });
+    } else if (seq_num === 2) {
+      var full_spec = {
+        path: './tasks/two-arm-new/img/',
+        state1_color: 'earth',
+        state2a_color: 'green',
+        state2b_color: 'yellow',
+        trial_seq: seq2_data,
+        display_score: true
+      };
+      jsPsych.data.get().addToLast({
+        block_num: seq_num,
+        seq_file: seq2_file
+      });
+    }
+    var two_arm_exp = new two_arm_full(full_spec);
+    var lapse_flag = false;
+  }
+}
 
-var lapse_flag = false;
+// var full_spec = {
+//   path: './tasks/two-arm-new/img/',
+//   state1_color: 'earth',
+//   state2a_color: 'purple',
+//   state2b_color: 'red',
+//   trial_seq: seq_data,
+//   display_score: true
+// };
+// var two_arm_exp = new two_arm_full(full_spec);
+//
+// var lapse_flag = false;
 
 var state1_choice = {
   type: jsPsychHtmlKeyboardResponse,
@@ -543,7 +590,8 @@ var state2_reward = {
       state1_key: two_arm_exp.state1_key,
       state2_key: two_arm_exp.state2_key,
       state1_rt: two_arm_exp.state1_rt,
-      state2_rt: two_arm_exp.state2_rt
+      state2_rt: two_arm_exp.state2_rt,
+      trial_seq_info: two_arm_exp.trial_seq[two_arm_exp.trial]
     });
     two_arm_exp.trial_end()
   }
@@ -578,11 +626,19 @@ var two_arm_exp_trial = {
   timeline: [state1_choice, post_state1_choice, cond_response_lapse]
 }
 
-var two_arm_exp_block = {
+var two_arm_exp_trials = {
   // timeline: [state1_choice, state1_response, state2_choice, state2_response, state2_reward],
   // repetitions: Ntrials_full_exp,
   timeline: [two_arm_exp_trial],
   loop_function: function(trial) {return two_arm_exp.trial < Ntrials_full_exp}
+}
+
+var two_arm_exp_block = {
+  timeline: [prep_exp_block, two_arm_exp_trials],
+  on_timeline_finish: function() {
+    seq_num += 1;
+    console.log('block finished, seq num updated hopefully')
+  }
 }
 // timeline.push(two_arm_exp_block)
 
@@ -622,6 +678,8 @@ var two_arm_task = {
     instructions_1d_block,
     two_arm_practice_block,
     instructions_2_block,
+    two_arm_exp_block,
+    instructions_3_block,
     two_arm_exp_block,
     two_arm_debrief_block
   ]
