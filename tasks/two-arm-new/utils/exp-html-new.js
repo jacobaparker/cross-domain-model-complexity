@@ -24,25 +24,38 @@ var instructions_1d_text = function(){
 	"<div align=justify>Now that you know how to pick aliens, you can learn how the play the whole game.<br><br>You will travel from earth to one of two planets, a green planet and a yellow planet:<br><br><img style='margin:0px auto;display:block;height:200px' src='./tasks/two-arm-new/img/example_planets.png'/></div>",
 	"<div align=justify>On each trial, you will first choose which spaceship to take.<br><br><img style='margin:0px auto;display:block;height:100px' src='./tasks/two-arm-new/img/example_rockets.png'/><br>The spaceships can fly to either planet, but one will mostly fly to the green planet, and the other mostly to the yellow planet.<br><br>The planet a spaceship goes to most won't change during the game.<br><br>Pick the one that you think will take you to the alien with the best mine, but remember sometimes you'll go to the other planet!</div>",
 	"<div align=justify>Lets's practice before doing the full game. Here are a few hints before you start: <br><br>Hint #1:<br>Remember which aliens have treasure. How good a mine is changes slowly, so an alien that has a lot of treasure to share now will be very likely to share with you in the near future.<br><br>Hint #2:<br>Remember, each alien has its own mine. Just because one alien has a bad mine, does not mean another has a good mine. Also, there are no funny patterns in how likely it is that an alien shares treasure with you, like every other time you ask, or depending on which spaceship you took. The aliens are not tricking you.<br><br>Hint #3:<br>The spaceship you choose is important because often the alien on one planet is better than the ones on another planet. You can find more treasure by finding the spaceship that takes you to the right planet.</div>",
-	"<div align=justify>In the real experiment, we are only going to give you 2 seconds for each response (2 seconds for the spaceships, and 2 seconds for the aliens). At the beginning that won't seem like very much time and you may find the task difficult. Over time, as you learn to play, you will find that 2 seconds is enough time to make good decisions.<br><br>Our advice is to think carefully about your strategy, but also to trust your instincts. By concentrating you can increase the number of points you win by a lot. There is an element of chance, but a lot of room for skill as well.<br><br>Now, you will do 20 practice trials. These don't count, and have no time limit in order to help you learn.</div>"];
+	"<div align=justify>In the real experiment, we are only going to give you 2 seconds for each response (2 seconds for the spaceships, and 2 seconds for the aliens). At the beginning that won't seem like very much time and you may find the task difficult. Over time, as you learn to play, you will find that 2 seconds is enough time to make good decisions.<br><br>Our advice is to think carefully about your strategy, but also to trust your instincts. By concentrating you can increase the number of points you win by a lot. There is an element of chance, but a lot of room for skill as well.<br><br>Now, you will do 25 practice trials. These don't count, and have no time limit in order to help you learn.</div>"];
 	return instructions
 };
 
 var instructions_2_text = function(){
 	var instructions_2 = ["<div align=justify>Ok, you've finished all practice phases. In the real game, you will find new planets, new aliens and new mines, but the rules and the spaceships will be the same.<br><br>Let's review everything we've learned and then begin playing.<br><br>Remember, you want to find as much space treasure as you can by flying to planets and asking an alien to mine for you. The chance that an alien can share space treasure with you changes slowly over time, so you need to concentrate and be flexible to keep track of which spaceships and aliens are good right now.</div>",
-	"<div align=justify><b>How much bonus money you make is based on how much space treasure you find.</b> You will get a bonus payment of 1 cent for every point you earn. On average people win about <b>$0.75</b>, and some have won around <b>$1.00</b>.<br><br>The game lasts for about 8 minutes and you will have two seconds for each choice. Good luck!</div>"];
+	"<div align=justify><b>How much bonus money you make is based on how much space treasure you find.</b> You will get a bonus payment of 1 cent for every two pieces of space treasure you find. On average people win about <b>$0.75</b>, and some have won around <b>$1.00</b>.<br><br>You will have two seconds for each choice.</div>",
+	`<div align=center>You will now begin the first of two main blocks (1/2).<br><br>The first block will take about 8 minutes.<br><br>Good luck!</div>`
+	];
 	return instructions_2
 }
 
-var instructions_3_text = function(){
-	var instructions_3 = ["<div align=justify>Ok, you've finished all practice phases. In the real game, you will find new planets, new aliens and new mines, but the rules and the spaceships will be the same.<br><br>Let's review everything we've learned and then begin playing.<br><br>Remember, you want to find as much space treasure as you can by flying to planets and asking an alien to mine for you. The chance that an alien can share space treasure with you changes slowly over time, so you need to concentrate and be flexible to keep track of which spaceships and aliens are good right now.</div>",
-	"<div align=justify><b>How much bonus money you make is based on how much space treasure you find.</b> You will get a bonus payment of 1 cent for every point you earn. On average people win about <b>$0.75</b>, and some have won around <b>$1.00</b>.<br><br>The game lasts for about 8 minutes and you will have two seconds for each choice. Good luck!</div>"];
+var instructions_3_text = function(score){
+	var instructions_3 = [
+		`<div align=center>End of block.<br><br>You found ` + score + ` pieces of space treasure.<br><br></div>`,
+		`<div align=center>You have finished the first block!<br><br>Please feel free to take a break before starting the next block.<br><br></div>`,
+		`<div align=center>In the second and final block, the planets, aliens, and mines have been changed again. The rules and the spaceships will remain the same.<br><br>Remember, you want to find as much space treasure as you can by flying to planets and asking an alien to mine for you. The chance that an alien can share space treasure with you changes slowly over time, so you need to concentrate and be flexible to keep track of which spaceships and aliens are good right now.<br><br></div>`,
+		`<div align=center><b>You will now begin the final block (2/2).</b><br><br>The final block will take about 8 minutes.<br><br></div>`
+	];
 	return instructions_3
+}
+
+var instructions_4_text = function(score){
+	var instructions_4 = [
+		`<div align=center>End of block.<br><br>You found ` + score + ` pieces of space treasure.<br><br></div>`,
+	];
+	return instructions_4
 }
 
 var two_arm_debrief_text = function(score) {
 	var html_arr = [
-    `<div align=center>Congrats! You have finished the space treasure game.<br><br>You found ` + score + ` pieces of space treasure.<br><br>You won $` + (score/100).toFixed(2) + ` !<br><br></div>`
+    `<div align=center>Congrats! You have finished the space treasure game.<br><br>You found ` + score + ` pieces of space treasure in total.<br><br>You won $` + (Math.ceil(score/2)/100).toFixed(2) + ` !<br><br></div>`
   ]
   return html_arr
 }

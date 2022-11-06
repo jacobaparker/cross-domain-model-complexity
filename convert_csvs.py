@@ -39,6 +39,10 @@ beads_csv3 = './tasks/HMM-beads/stimuli/high_hazard_H99.csv'
 beads_json1 = './tasks/HMM-beads/stimuli/low_hazard_H10.json'
 beads_json2 = './tasks/HMM-beads/stimuli/low_hazard_H01.json'
 beads_json3 = './tasks/HMM-beads/stimuli/high_hazard_H99.json'
+beads_csv4 = './tasks/HMM-beads/stimuli/low_hazard_H01_N375.csv'
+beads_csv5 = './tasks/HMM-beads/stimuli/high_hazard_H99_N375.csv'
+beads_json4 = './tasks/HMM-beads/stimuli/low_hazard_H01.json'
+beads_json5 = './tasks/HMM-beads/stimuli/high_hazard_H99.json'
 
 # csv_to_json(instr_csv,instr_json)
 csv_to_json(two_arm_csv,two_arm_json)

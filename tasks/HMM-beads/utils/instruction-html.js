@@ -27,7 +27,7 @@ var beads_instructions_2_text = function() {
 var beads_instructions_3_text = function() {
   var html_arr = [
     `<div align=center>You've finished the practice block and will now move on to the real experiment.<br><br><b>The percent of beads you predict correctly will determine how much bonus money you make</b>. For every percentage point correct you are, you will receive 1 cent. For example, if you predict 75% of beads accurately, you will receive <b>$0.75</b>.<br><br>On average, people win about <b>$0.70 to $0.75</b>.<br><br>`,
-    `<div align=center><b>You will now begin the main block (1/2).</b><br><br>The first block will take about 12 minutes.<br><br></div>`
+    `<div align=center><b>You will now begin the main block (1/2).</b><br><br>The first block will take about 9 minutes.<br><br></div>`
   ];
   return html_arr
 }
@@ -36,7 +36,7 @@ var beads_instructions_4_text = function() {
   var html_arr = [
     `<div align=center>You have finished the first block!<br><br>Please feel free to take a break before starting the next block.<br><br></div>`,
     `<div align=justify><b>As a reminder:</b><br><br><ul><li>The jar on the left contains <b>80% black beads and 20% white beads</b>.</li><li>The jar on the right contains <b>20% black beads and 80% white beads</b>.</li></ul><br>The best strategy to predict the <b>NEXT</b> bead is to predict the jar the next bead will come from.<br><br></div>`,
-    `<div align=center><b>You will now begin the final block (2/2).</b><br><br>The final block will take about 12 minutes.<br><br></div>`
+    `<div align=center><b>You will now begin the final block (2/2).</b><br><br>The final block will take about 9 minutes.<br><br></div>`
   ];
   return html_arr
 }

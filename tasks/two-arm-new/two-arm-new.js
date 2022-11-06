@@ -450,63 +450,84 @@ var instructions_2_block = {
 
 var instructions_3_block = {
 	type: jsPsychInstructions,
-	pages: instructions_3_text(),
+	pages: [],
 	key_forward: "j",
 	key_backward: "f",
 	show_clickable_nav: true,
-}
-
-var prep_exp_block = {
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: '',
-  choices: [' '],
-  prompt: 'Press SPACE to start.',
-  on_start: function(trial){
-    console.log('hi')
-    if (seq_num === 1) {
-      console.log('tESTSET')
-      var full_spec = {
-        path: './tasks/two-arm-new/img/',
-        state1_color: 'earth',
-        state2a_color: 'purple',
-        state2b_color: 'red',
-        trial_seq: seq1_data,
-        display_score: true
-      };
-      jsPsych.data.get().addToLast({
-        block_num: seq_num,
-        seq_file: seq1_file
-      });
-    } else if (seq_num === 2) {
-      var full_spec = {
-        path: './tasks/two-arm-new/img/',
-        state1_color: 'earth',
-        state2a_color: 'green',
-        state2b_color: 'yellow',
-        trial_seq: seq2_data,
-        display_score: true
-      };
-      jsPsych.data.get().addToLast({
-        block_num: seq_num,
-        seq_file: seq2_file
-      });
-    }
-    var two_arm_exp = new two_arm_full(full_spec);
-    var lapse_flag = false;
+  on_start: function(trial) {
+    trial.pages = instructions_3_text(two_arm_exp.score);
   }
 }
 
-// var full_spec = {
-//   path: './tasks/two-arm-new/img/',
-//   state1_color: 'earth',
-//   state2a_color: 'purple',
-//   state2b_color: 'red',
-//   trial_seq: seq_data,
-//   display_score: true
-// };
-// var two_arm_exp = new two_arm_full(full_spec);
+var instructions_4_block = {
+	type: jsPsychInstructions,
+	pages: [],
+	key_forward: "j",
+	key_backward: "f",
+	show_clickable_nav: true,
+  on_start: function(trial) {
+    trial.pages = instructions_4_text(two_arm_exp_2.score);
+  }
+}
+
+// var test_test_var = 0;
+// console.log(test_test_var)
 //
-// var lapse_flag = false;
+// var prep_exp_block = {
+//   type: jsPsychHtmlKeyboardResponse,
+//   stimulus: '',
+//   choices: [' '],
+//   prompt: 'Press SPACE to start.',
+//   on_start: function(trial){
+//     switch(seq_num) {
+//       case 1:
+//         var full_spec = {
+//           path: './tasks/two-arm-new/img/',
+//           state1_color: 'earth',
+//           state2a_color: 'purple',
+//           state2b_color: 'red',
+//           trial_seq: seq1_data,
+//           display_score: true
+//         };
+//         jsPsych.data.get().addToLast({
+//           block_num: seq_num,
+//           seq_file: seq1_file
+//         });
+//         break;
+//       case 2:
+//         var full_spec = {
+//           path: './tasks/two-arm-new/img/',
+//           state1_color: 'earth',
+//           state2a_color: 'green',
+//           state2b_color: 'yellow',
+//           trial_seq: seq2_data,
+//           display_score: true
+//         };
+//         jsPsych.data.get().addToLast({
+//           block_num: seq_num,
+//           seq_file: seq2_file
+//         });
+//         break;
+//     }
+//     var two_arm_exp = new two_arm_full(full_spec);
+//     var lapse_flag = false;
+//     console.log('hi')
+//     test_test_var += 1;
+//     console.log(test_test_var)
+//   }
+// }
+
+var full_spec = {
+  path: './tasks/two-arm-new/img/',
+  state1_color: 'earth',
+  state2a_color: 'purple',
+  state2b_color: 'red',
+  trial_seq: seq1_data,
+  display_score: true
+};
+var two_arm_exp = new two_arm_full(full_spec);
+
+var lapse_flag = false;
 
 var state1_choice = {
   type: jsPsychHtmlKeyboardResponse,
@@ -592,6 +613,8 @@ var state2_reward = {
   on_finish: function(trial) {
     jsPsych.data.get().addToLast({
       block: 'two_arm_exp',
+      block_num: 1,
+      seq_file: seq1_file,
       trial_number: two_arm_exp.trial+1,
       state1_action: two_arm_exp.action_current+1,
       state2_visited: two_arm_exp.state2_current+1,
@@ -636,20 +659,177 @@ var two_arm_exp_trial = {
   timeline: [state1_choice, post_state1_choice, cond_response_lapse]
 }
 
-var two_arm_exp_trials = {
+var two_arm_exp_block = {
   // timeline: [state1_choice, state1_response, state2_choice, state2_response, state2_reward],
   // repetitions: Ntrials_full_exp,
   timeline: [two_arm_exp_trial],
-  loop_function: function(trial) {return two_arm_exp.trial < Ntrials_full_exp}
-}
-
-var two_arm_exp_block = {
-  timeline: [prep_exp_block, two_arm_exp_trials],
+  loop_function: function(trial) {return two_arm_exp.trial < Ntrials_full_exp},
   on_timeline_finish: function() {
-    seq_num += 1;
-    console.log('block finished, seq num updated hopefully')
+    jsPsych.data.get().addToLast({
+      two_arm_score_block1: two_arm_exp.score
+    });
   }
 }
+
+var full_spec = {
+  path: './tasks/two-arm-new/img/',
+  state1_color: 'earth',
+  state2a_color: 'green',
+  state2b_color: 'yellow',
+  trial_seq: seq2_data,
+  display_score: true
+};
+var two_arm_exp_2 = new two_arm_full(full_spec);
+
+var state1_choice_2 = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select a rocket',
+  trial_duration: 2000,
+  on_start: function(trial) {
+    two_arm_exp_2.trial_start()
+    trial.stimulus =  two_arm_exp_2.state1_choice_response_html()
+    trial.choices = two_arm_exp_2.state1.get_response_options()
+  },
+  on_finish: function(trial) {
+    if (trial.response === 'j' || trial.response === 'f') {
+      two_arm_exp_2.state1.register_response(trial.response)
+      two_arm_exp_2.register_response_state1(trial.response, trial.rt)
+      lapse_flag = false;
+    } else {
+      lapse_flag = true;
+    }
+  }
+};
+
+var state1_response_2 = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select a rocket',
+  trial_duration: 500,
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_exp_2.state1_choice_response_html()
+  },
+  on_finish: function(trial) {
+    two_arm_exp_2.prepare_carryover_stim()
+  }
+};
+
+var state2_choice_2 = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  trial_duration: 2000,
+  prompt: 'Press F or J to select an alien',
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_exp_2.state2_choice_response_html()
+    trial.choices = two_arm_exp_2.state2_get_response_options()
+  },
+  on_finish: function(trial) {
+    if (trial.response === 'j' || trial.response === 'f') {
+      two_arm_exp_2.register_response_state2(trial.response, trial.rt)
+      two_arm_exp_2.determine_reward()
+      lapse_flag = false;
+    } else {
+      lapse_flag = true;
+    }
+  }
+}
+
+var state2_response_2 = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select an alien',
+  trial_duration: 500,
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_exp_2.state2_choice_response_html()
+  },
+  on_finish: function(trial) {
+    two_arm_exp_2.update_alien_states()
+    two_arm_exp_2.update_score()
+  }
+};
+
+var state2_reward_2 = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '',
+  choices: [],
+  prompt: 'Press F or J to select an alien',
+  trial_duration: 1000,
+  on_start: function(trial) {
+    trial.stimulus =  two_arm_exp_2.state2_reward_html()
+  },
+  on_finish: function(trial) {
+    jsPsych.data.get().addToLast({
+      block: 'two_arm_exp',
+      block_num: 2,
+      seq_file: seq2_file,
+      trial_number: two_arm_exp_2.trial+1,
+      state1_action: two_arm_exp_2.action_current+1,
+      state2_visited: two_arm_exp_2.state2_current+1,
+      choice: two_arm_exp_2.choice,
+      rewarded: two_arm_exp_2.rewarded,
+      state1_key: two_arm_exp_2.state1_key,
+      state2_key: two_arm_exp_2.state2_key,
+      state1_rt: two_arm_exp_2.state1_rt,
+      state2_rt: two_arm_exp_2.state2_rt,
+      trial_seq_info: two_arm_exp_2.trial_seq[two_arm_exp_2.trial]
+    });
+    two_arm_exp_2.trial_end()
+  }
+}
+
+var response_lapse_2 = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '<div align=center>Please respond within 2 seconds.<br><br>Trial will now repeat.</div>',
+  response_ends_trial: false,
+  trial_duration: 2000,
+  on_start: function(trial) {
+    two_arm_exp_2.trial_end_lapse()
+  }
+}
+
+var cond_response_lapse_2 = {
+  timeline: [response_lapse_2],
+  conditional_function: function() {return lapse_flag}
+}
+
+var post_state2_choice_2 = {
+  timeline: [state2_response_2, state2_reward_2],
+  conditional_function: function() {return ! lapse_flag}
+}
+
+var post_state1_choice_2 = {
+  timeline: [state1_response_2, state2_choice_2, post_state2_choice_2, cond_response_lapse_2],
+  conditional_function: function() {return ! lapse_flag}
+}
+
+var two_arm_exp_trial_2 = {
+  timeline: [state1_choice_2, post_state1_choice_2, cond_response_lapse_2]
+}
+
+var two_arm_exp_block_2 = {
+  // timeline: [state1_choice, state1_response, state2_choice, state2_response, state2_reward],
+  // repetitions: Ntrials_full_exp,
+  timeline: [two_arm_exp_trial_2],
+  loop_function: function(trial) {return two_arm_exp_2.trial < Ntrials_full_exp},
+  on_timeline_finish: function() {
+    jsPsych.data.get().addToLast({
+      two_arm_score_block2: two_arm_exp_2.score
+    });
+  }
+}
+
+// var two_arm_exp_block = {
+//   timeline: [prep_exp_block, two_arm_exp_trials],
+//   on_timeline_finish: function() {
+//     seq_num += 1;
+//     console.log('block finished, seq num updated hopefully')
+//   }
+// }
 // timeline.push(two_arm_exp_block)
 
 // var two_arm_exp_block = {
@@ -667,11 +847,11 @@ var two_arm_debrief_block = {
 	key_backward: "f",
 	show_clickable_nav: true,
   on_start: function(trial) {
-    trial.pages = two_arm_debrief_text(two_arm_exp.score);
-    var two_arm_bonus = two_arm_exp.score/100;
+    trial.pages = two_arm_debrief_text(two_arm_exp.score + two_arm_exp_2.score);
+    var two_arm_bonus = Math.ceil((two_arm_exp.score + two_arm_exp_2.score)/2)/100;
     total_bonus += two_arm_bonus;
     jsPsych.data.get().addToLast({
-      two_arm_score: two_arm_exp.score,
+      two_arm_score_total: two_arm_exp.score + two_arm_exp_2.score
     });
   }
 }
@@ -690,7 +870,8 @@ var two_arm_task = {
     instructions_2_block,
     two_arm_exp_block,
     instructions_3_block,
-    two_arm_exp_block,
+    two_arm_exp_block_2,
+    instructions_4_block,
     two_arm_debrief_block
   ]
 }
