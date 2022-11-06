@@ -30,7 +30,7 @@ var instructions_1d_text = function(){
 
 var instructions_2_text = function(){
 	var instructions_2 = ["<div align=justify>Ok, you've finished all practice phases. In the real game, you will find new planets, new aliens and new mines, but the rules and the spaceships will be the same.<br><br>Let's review everything we've learned and then begin playing.<br><br>Remember, you want to find as much space treasure as you can by flying to planets and asking an alien to mine for you. The chance that an alien can share space treasure with you changes slowly over time, so you need to concentrate and be flexible to keep track of which spaceships and aliens are good right now.</div>",
-	"<div align=justify><b>How much bonus money you make is based on how much space treasure you find.</b> You will get a bonus payment of 1 cent for every two pieces of space treasure you find. On average people win about <b>$0.75</b>, and some have won around <b>$1.00</b>.<br><br>You will have two seconds for each choice.</div>",
+	"<div align=justify><b>How much bonus money you make is based on how much space treasure you find.</b> You will get a bonus payment of 1 cent for every two pieces of space treasure you find. On average people win about <b>$0.70</b>, and some have won around <b>$0.80</b>.<br><br>You will have two seconds for each choice.</div>",
 	`<div align=center>You will now begin the first of two main blocks (1/2).<br><br>The first block will take about 8 minutes.<br><br>Good luck!</div>`
 	];
 	return instructions_2
@@ -40,7 +40,7 @@ var instructions_3_text = function(score){
 	var instructions_3 = [
 		`<div align=center>End of block.<br><br>You found ` + score + ` pieces of space treasure.<br><br></div>`,
 		`<div align=center>You have finished the first block!<br><br>Please feel free to take a break before starting the next block.<br><br></div>`,
-		`<div align=center>In the second and final block, the planets, aliens, and mines have been changed again. The rules and the spaceships will remain the same.<br><br>Remember, you want to find as much space treasure as you can by flying to planets and asking an alien to mine for you. The chance that an alien can share space treasure with you changes slowly over time, so you need to concentrate and be flexible to keep track of which spaceships and aliens are good right now.<br><br></div>`,
+		`<div align=center>In the second (and final) block, the planets, aliens, and mines have been changed again. The rules and the spaceships will remain the same.<br><br>Remember, you want to find as much space treasure as you can by flying to planets and asking an alien to mine for you. The chance that an alien can share space treasure with you changes slowly over time, so you need to concentrate and be flexible to keep track of which spaceships and aliens are good right now.<br><br></div>`,
 		`<div align=center><b>You will now begin the final block (2/2).</b><br><br>The final block will take about 8 minutes.<br><br></div>`
 	];
 	return instructions_3

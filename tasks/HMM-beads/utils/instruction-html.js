@@ -26,7 +26,7 @@ var beads_instructions_2_text = function() {
 
 var beads_instructions_3_text = function() {
   var html_arr = [
-    `<div align=center>You've finished the practice block and will now move on to the real experiment.<br><br><b>The percent of beads you predict correctly will determine how much bonus money you make</b>. For every percentage point correct you are, you will receive 1 cent. For example, if you predict 75% of beads accurately, you will receive <b>$0.75</b>.<br><br>On average, people win about <b>$0.70 to $0.75</b>.<br><br>`,
+    `<div align=center>You've finished the practice block and will now move on to the real experiment.<br><br><b>The percent of beads you predict correctly will determine how much bonus money you make</b>. For every percentage point correct you are, you will receive 1 cent. For example, if you predict 75% of beads accurately, you will receive <b>$0.75</b>.<br><br>On average, people win about <b>$0.65</b> .<br><br>`,
     `<div align=center><b>You will now begin the main block (1/2).</b><br><br>The first block will take about 9 minutes.<br><br></div>`
   ];
   return html_arr
@@ -43,7 +43,7 @@ var beads_instructions_4_text = function() {
 
 var beads_debrief_block_text = function(score, bonus) {
   var html_arr = [
-    `<div align=center>Congrats! You have finished the beads prediction game.<br><br>You predicted ` + (score*100/(beads_exp_ntrials*2)).toFixed(2) + `% of beads correctly.<br><br>You won $` + bonus.toFixed(2) + ` cents!<br><br></div>`
+    `<div align=center>Congrats! You have finished the beads prediction game.<br><br>You predicted ` + (score*100/(beads_exp_ntrials*2)).toFixed(2) + `% of beads correctly.<br><br>You won $` + bonus.toFixed(2) + ` !<br><br></div>`
   ]
   return html_arr
 }
