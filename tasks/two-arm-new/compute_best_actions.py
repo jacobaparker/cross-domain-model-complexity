@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-seqnum = 2
+seqnum = 28
 
 tdf = pd.read_csv("stimuli/seq"+str(seqnum)+".csv")
 
@@ -21,7 +21,7 @@ for t in range(len(tdf)):
     tdf.loc[t,'S1_A_star'] = Rw_ind
 
 tdf.to_csv(
-    path_or_buf="stimuli/seq"+str(seqnum)+"_new_new.csv",
+    path_or_buf="stimuli/seq"+str(seqnum)+"_optim.csv",
     header=True,
     index=False
 )
