@@ -10,8 +10,8 @@ import numpy as np
 from scipy import stats
 from scipy.stats import spearmanr, entropy, pearsonr
 import scipy.io as spio
-import statsmodels.formula.api as sm
-import sys, csv, pingouin
+#import statsmodels.formula.api as sm
+import sys, csv
 import os
 import quickHTML as qh
 import matplotlib.pyplot as plt
@@ -95,7 +95,41 @@ def mutual_inf(x, y):
                 
     return mi
 
-#%% extract data
+def encode_task_variables(df,feat_list,t_arr):
+    # Inputs:
+    #    df: dataframe with task variables
+    #    feat_list: list of feature names corresponding to dataframe column headers
+    #    t_arr: array of timepoints relative to current trial for each feature
+    #
+    # Outputs:
+    #    feat_arr: a numpy array of the features encoded into a single value per time point
+    assert len(feat_list) == len(t_arr)
+    
+    depth = np.max(t_arr)
+    feat_arr = np.zeros((len(df)-depth))
+    for f in range(len(feat_list)):
+        temp_arr = df[feat_list[f]].copy().to_numpy()
+        temp_arr = temp_arr[depth-t_arr[f]:len(temp_arr)-t_arr[f]]
+        if (np.max(temp_arr) == 2) & (np.min(temp_arr) == 1):
+            temp_arr = temp_arr - 1
+        feat_arr = feat_arr + (temp_arr*(2**f))
+        
+    joint_feat_num = 2**(f+1)
+    
+    # feat_counts = np.empty((2**(f+1)))
+    # for f in range(2**(f+1)):
+    #     feat_counts[f] = np.sum(feat_arr==f)
+        
+    return feat_arr, joint_feat_num
+
+def get_joint_counts(joint_feat_arr,joint_feat_num):
+    feat_counts = np.empty((joint_feat_num))
+    for f in range(joint_feat_num):
+        feat_counts[f] = np.sum(joint_feat_arr==f)
+    return feat_counts
+
+#%% extract data, put in more useable forms, generate qc and summary figures
+#   for each subject
 
 rootdir = 'C:\\Users\\parja\\Projects\\cross-domain-model-complexity\\'
 datadir = rootdir + 'data\\'
@@ -106,13 +140,14 @@ sjfiles = [sjfile for sjfile in os.listdir(datadir) if '.csv' in sjfile]
 goodfiles = []
 sjkey = {}
 
-two_arm_seq24 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_new_new.csv')
-two_arm_seq28 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_new_new.csv')
+two_arm_seq24 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
+two_arm_seq28 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
 
 sjreport = qh.html(andir + 'subjects_qc_report.html', style='new')
 
 #put list of columns as dict keys here
 gdf = pd.DataFrame({'subject': [],
+                    'data_file': [],
                     'lowH_score': [],
                     'highH_score': [],
                     'two_arm24_score': [],
@@ -141,7 +176,11 @@ gdf = pd.DataFrame({'subject': [],
                     'com_rew_total28': [],
                     'rare_rew_total28': [],
                     'com_norew_total28': [],
-                    'rare_norew_total28': []
+                    'rare_norew_total28': [],
+                    'Ipast_beads': [],
+                    'Ifuture_beads': [],
+                    'Ipast_two_arm': [],
+                    'Ifuture_two_arm': []
                     })
 
 beads_sjdf_list = []
@@ -156,281 +195,384 @@ for sjfile in sjfiles:
         #this should filter out incomplete files
         bonus = float(sjdf.total_bonus[np.isnan(sjdf.total_bonus) == False])
         
-        goodfiles.append(sjfile)
-        sjkey[jj] = sjdf.subject_id[0]
-        gdf.subject[jj] = jj + 1
-        gdf.lowH_score[jj] = int(sjdf.lowH_score[np.isnan(sjdf.lowH_score) == False])
-        gdf.highH_score[jj] = int(sjdf.highH_score[np.isnan(sjdf.highH_score) == False])
-        
-        lowH_exp_df = sjdf[sjdf.block == 'lowH']
-        highH_exp_df = sjdf[sjdf.block == 'highH']
-        two_arm24_df = sjdf['seq24' in sjdf.seq_file]
-        two_arm28_df = sjdf['seq28' in sjdf.seq_file]
-        
-        gdf.two_arm24_score[jj] = two_arm24_df[['two_arm_score_block1','two_arm_score_block2']].max()
-        gdf.two_arm28_score[jj] = two_arm28_df[['two_arm_score_block1','two_arm_score_block2']].max()
-        
-        lowH_ind = int(sjdf.index[np.isnan(sjdf.lowH_score) == False])
-        highH_ind = int(sjdf.index[np.isnan(sjdf.highH_score) == False])
-        two_arm24_ind = int(two_arm24_df.index[two_arm24_df.trial_number == 125])
-        two_arm28_ind = int(two_arm28_df.index[two_arm28_df.trial_number == 125])
-        
-        if lowH_ind < two_arm24_ind:
-            gdf.first_task[jj] = 'beads'
-        else:
-            gdf.first_task[jj] = 'two_arm'
-            
-        if lowH_ind < highH_ind:
-            gdf.first_bead_block[jj] = 'lowH'
-        else:
-            gdf.first_bead_block[jj] = 'highH'
-            
-        if two_arm24_ind < two_arm28_ind:
-            gdf.first_two_arm_seq[jj] = 'seq24'
-        else:
-            gdf.first_two_arm_seq[jj] = 'seq28'
-            
-        ltimes = lowH_exp_df.time_elapsed.to_numpy()
-        htimes = highH_exp_df.time_elapsed.to_numpy()
-        gdf.lowH_duration[jj] = (ltimes[-1] - ltimes[0])/1000/60
-        gdf.highH_duration[jj] = (htimes[-1] - htimes[0])/1000/60
-        
-        atimes = two_arm24_df.time_elapsed.to_numpy()
-        gdf.two_arm24_duration[jj] = (atimes[-1] - atimes[0])/1000/60
-        
-        atimes = two_arm28_df.time_elapsed.to_numpy()
-        gdf.two_arm28_duration[jj] = (atimes[-1] - atimes[0])/1000/60
-        
-        gdf.beads_ntrials[jj] = 375
-        gdf.two_arm_ntrials[jj] = 125
-        
-        com_stay_rew = 0
-        com_rew_total = 0
-        rare_stay_rew = 0
-        rare_rew_total = 0
-        com_stay_norew = 0
-        com_norew_total = 0
-        rare_stay_norew = 0
-        rare_norew_total = 0
-        arm_exp_df = two_arm24_df.copy()
-        for t in range(1,len(arm_exp_df)):
-            if arm_exp_df.state1_action[t-1] == arm_exp_df.state2_visited[t-1]:
-                if arm_exp_df.rewarded[t-1] == 1:
-                    com_rew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        com_stay_rew += 1
-                else:
-                    com_norew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        com_stay_norew += 1
-            else:
-                if arm_exp_df.rewarded[t-1] == 1:
-                    rare_rew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        rare_stay_rew += 1
-                else:
-                    rare_norew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        rare_stay_norew += 1
-        
-        gdf.com_rew_stay24[jj] = com_stay_rew
-        gdf.rare_rew_stay24[jj] = rare_stay_rew
-        gdf.com_norew_stay24[jj] = com_stay_norew
-        gdf.rare_norew_stay24[jj] = rare_stay_norew
-        gdf.com_rew_total24[jj] = com_rew_total
-        gdf.rare_rew_total24[jj] = rare_rew_total
-        gdf.com_norew_total24[jj] = com_norew_total
-        gdf.rare_norew_total24[jj] = rare_norew_total
-        
-        com_stay_rew = 0
-        com_rew_total = 0
-        rare_stay_rew = 0
-        rare_rew_total = 0
-        com_stay_norew = 0
-        com_norew_total = 0
-        rare_stay_norew = 0
-        rare_norew_total = 0
-        arm_exp_df = two_arm28_df.copy()
-        for t in range(1,len(arm_exp_df)):
-            if arm_exp_df.state1_action[t-1] == arm_exp_df.state2_visited[t-1]:
-                if arm_exp_df.rewarded[t-1] == 1:
-                    com_rew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        com_stay_rew += 1
-                else:
-                    com_norew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        com_stay_norew += 1
-            else:
-                if arm_exp_df.rewarded[t-1] == 1:
-                    rare_rew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        rare_stay_rew += 1
-                else:
-                    rare_norew_total += 1
-                    if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
-                        rare_stay_norew += 1
-        
-        gdf.com_rew_stay28[jj] = com_stay_rew
-        gdf.rare_rew_stay28[jj] = rare_stay_rew
-        gdf.com_norew_stay28[jj] = com_stay_norew
-        gdf.rare_norew_stay28[jj] = rare_stay_norew
-        gdf.com_rew_total28[jj] = com_rew_total
-        gdf.rare_rew_total28[jj] = rare_rew_total
-        gdf.com_norew_total28[jj] = com_norew_total
-        gdf.rare_norew_total28[jj] = rare_norew_total
-        
-        fig1, axs1 = plt.subplots(1,2,figsize=(12, 2))
-        axs1[0].plot(lowH_exp_df.trial_number,lowH_exp_df.jar,color='r')
-        axs1[0].scatter(lowH_exp_df.trial_number,lowH_exp_df.choice,c='black',marker='|')
-        axs1[0].set_title('Low Hazard')
-        
-        axs1[1].scatter(highH_exp_df.trial_number,highH_exp_df.choice,c='black',marker='|')
-        axs1[1].set_title('High Hazard')
-        plt.savefig(figdir + 'sj' + str(jj+1) + '_bead_choice_seq.png',dpi=150)
-        
-        arm_exp_df = two_arm24_df.copy()
-        mdict = {
-            'f': 2,
-            'j': 3
-        }
-        
-        cdict = {
-            1: 'tab:blue',
-            2: 'tab:orange',
-            3: 'tab:green',
-            4: 'tab:red'
-        }
-        
-        fig2, axs2 = plt.subplots(1,2,figsize=(12, 3))
-        axs2[0].plot(arm_exp_df.trial_number,np.array(arm_exp_df['S1_A_star'])+1,color='gray')
-        for choice in unique(arm_exp_df.choice):
-            axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
-                          arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
-                          marker=mdict['f'],
-                           c=cdict[choice])
-            axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
-                          arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
-                          marker=mdict['j'],
-                           c=cdict[choice])
-            
-        axs2[1].plot(arm_seq_df.trial_number,np.array(arm_seq_df['S0_A_star'])+1,color='gray')
-        for action in unique(arm_exp_df.state1_action):
-            axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
-                           arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
-                           marker=mdict['f'],
-                           c='black')
-            axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
-                           arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
-                           marker=mdict['j'],
-                           c='black')
-            
-        axs2[0].set_title('State2 Choice')
-        axs2[1].set_title('State1 Choice')
-        plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm24_choice_seq.png',dpi=150)
-        
-        arm_exp_df = two_arm28_df.copy()
-        mdict = {
-            'f': 2,
-            'j': 3
-        }
-        
-        cdict = {
-            1: 'tab:blue',
-            2: 'tab:orange',
-            3: 'tab:green',
-            4: 'tab:red'
-        }
-        
-        fig2, axs2 = plt.subplots(1,2,figsize=(12, 3))
-        axs2[0].plot(arm_seq_df.trial_number,np.array(arm_seq_df['S1_A_star'])+1,color='gray')
-        for choice in unique(arm_exp_df.choice):
-            axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
-                          arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
-                          marker=mdict['f'],
-                           c=cdict[choice])
-            axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
-                          arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
-                          marker=mdict['j'],
-                           c=cdict[choice])
-            
-        axs2[1].plot(arm_seq_df.trial_number,np.array(arm_seq_df['S0_A_star'])+1,color='gray')
-        for action in unique(arm_exp_df.state1_action):
-            axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
-                           arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
-                           marker=mdict['f'],
-                           c='black')
-            axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
-                           arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
-                           marker=mdict['j'],
-                           c='black')
-            
-        axs2[0].set_title('State2 Choice')
-        axs2[1].set_title('State1 Choice')
-        plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm28_choice_seq.png',dpi=150)
-        
-        if gdf.first_two_arm_seq[jj] == 'seq24':
-            seq1 = '24'
-            com_stay_rew1 = gdf.com_rew_stay24[jj]
-            com_rew_total1 = gdf.com_rew_total24[jj]
-            com_stay_norew1 = gdf.com_norew_stay24[jj]
-            com_norew_total1 = gdf.com_norew_total24[jj]
-            rare_stay_rew1 = gdf.rare_rew_stay24[jj]
-            rare_rew_total1 = gdf.rare_rew_total24[jj]
-            rare_stay_norew1 = gdf.rare_norew_stay24[jj]
-            rare_norew_total1 = gdf.rare_norew_total24[jj]
-            
-            seq2 = '28'
-            com_stay_rew2 = gdf.com_rew_stay28[jj]
-            com_rew_total2 = gdf.com_rew_total28[jj]
-            com_stay_norew2 = gdf.com_norew_stay28[jj]
-            com_norew_total2 = gdf.com_norew_total28[jj]
-            rare_stay_rew2 = gdf.rare_rew_stay28[jj]
-            rare_rew_total2 = gdf.rare_rew_total28[jj]
-            rare_stay_norew2 = gdf.rare_norew_stay28[jj]
-            rare_norew_total2 = gdf.rare_norew_total28[jj]
-        else:
-            seq1 = '28'
-            com_stay_rew1 = gdf.com_rew_stay28[jj]
-            com_rew_total1 = gdf.com_rew_total28[jj]
-            com_stay_norew1 = gdf.com_norew_stay28[jj]
-            com_norew_total1 = gdf.com_norew_total28[jj]
-            rare_stay_rew1 = gdf.rare_rew_stay28[jj]
-            rare_rew_total1 = gdf.rare_rew_total28[jj]
-            rare_stay_norew1 = gdf.rare_norew_stay28[jj]
-            rare_norew_total1 = gdf.rare_norew_total28[jj]
-            
-            seq2 = '24'
-            com_stay_rew2 = gdf.com_rew_stay24[jj]
-            com_rew_total2 = gdf.com_rew_total24[jj]
-            com_stay_norew2 = gdf.com_norew_stay24[jj]
-            com_norew_total2 = gdf.com_norew_total24[jj]
-            rare_stay_rew2 = gdf.rare_rew_stay24[jj]
-            rare_rew_total2 = gdf.rare_rew_total24[jj]
-            rare_stay_norew2 = gdf.rare_norew_stay24[jj]
-            rare_norew_total2 = gdf.rare_norew_total24[jj]
-            
-        fig5, axs5 = plt.subplots(1,2,figsize=(8,3))
-        labels = ['Reward','No Reward']
-        x = np.arange(len(labels))
-        width = 0.35
-        axs5[0].bar(x - width/2,[com_stay_rew1/com_rew_total1, com_stay_norew1/com_norew_total1],width,label='Common')
-        axs5[0].bar(x + width/2,[rare_stay_rew1/rare_rew_total1, rare_stay_norew1/rare_norew_total1],width,label='Rare')
-        axs5[0].set_xticks(x,labels)
-        axs5[0].legend()
-        axs5[0].set_ylabel('A1 Repeat Probability')
-        axs5[0].set_title('Block 1, Seq ' + seq1)
-        
-        axs5[1].bar(x - width/2,[com_stay_rew2/com_rew_total2, com_stay_norew2/com_norew_total2],width,label='Common')
-        axs5[1].bar(x + width/2,[rare_stay_rew2/rare_rew_total2, rare_stay_norew2/rare_norew_total2],width,label='Rare')
-        axs5[1].set_xticks(x,labels)
-        axs5[1].legend()
-        axs5[0].set_title('Block 2, Seq ' + seq2)
-        plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm_stay_prob.png',dpi=150)
-        
-        
-        
-        jj += 1
-        
     except:
-            pass
+        continue
+        
+    sjreport.write_header('SJ' + str(jj+1) + ', PID:' + sjdf.subject_id[0])
+    sjreport.write_text('File: ' + sjfile)
+    goodfiles.append(sjfile)
+    sjkey[jj] = sjdf.subject_id[0]
+    gdf.loc[jj,'subject'] = jj + 1
+    gdf.loc[jj,'data_file'] = sjfile
+    gdf.loc[jj,'lowH_score'] = int(sjdf.lowH_score[np.isnan(sjdf.lowH_score) == False])
+    gdf.loc[jj,'highH_score'] = int(sjdf.highH_score[np.isnan(sjdf.highH_score) == False])
+    
+    lowH_exp_df = sjdf[sjdf.block == 'lowH']
+    highH_exp_df = sjdf[sjdf.block == 'highH']
+    two_arm24_df = sjdf[sjdf.seq_file == './tasks/two-arm-new/stimuli/seq24.json']
+    two_arm28_df = sjdf[sjdf.seq_file == './tasks/two-arm-new/stimuli/seq28.json']
+    
+    # gdf.loc[jj,'two_arm24_score'] = two_arm24_df[['two_arm_score_block1','two_arm_score_block2']].max()
+    # gdf.loc[jj,'two_arm28_score'] = two_arm28_df[['two_arm_score_block1','two_arm_score_block2']].max()
+    
+    lowH_ind = int(sjdf.index[np.isnan(sjdf.lowH_score) == False].to_numpy())
+    highH_ind = int(sjdf.index[np.isnan(sjdf.highH_score) == False].to_numpy())
+    two_arm24_ind = int(two_arm24_df.index[two_arm24_df.trial_number == 124].to_numpy())
+    two_arm28_ind = int(two_arm28_df.index[two_arm28_df.trial_number == 124].to_numpy())
+    
+    if lowH_ind < two_arm24_ind:
+        gdf.loc[jj,'first_task'] = 'beads'
+    else:
+        gdf.loc[jj,'first_task'] = 'two_arm'
+        
+    if lowH_ind < highH_ind:
+        gdf.loc[jj,'first_bead_block'] = 'lowH'
+    else:
+        gdf.loc[jj,'first_bead_block'] = 'highH'
+        
+    if two_arm24_ind < two_arm28_ind:
+        gdf.loc[jj,'first_two_arm_seq'] = 'seq24'
+        gdf.loc[jj,'two_arm24_score'] = two_arm24_df['two_arm_score_block1'].max()
+        gdf.loc[jj,'two_arm28_score'] = two_arm28_df['two_arm_score_block2'].max()
+    else:
+        gdf.loc[jj,'first_two_arm_seq'] = 'seq28'
+        gdf.loc[jj,'two_arm24_score'] = two_arm24_df['two_arm_score_block2'].max()
+        gdf.loc[jj,'two_arm28_score'] = two_arm28_df['two_arm_score_block1'].max()
+        
+    ltimes = lowH_exp_df.time_elapsed.to_numpy()
+    htimes = highH_exp_df.time_elapsed.to_numpy()
+    gdf.loc[jj,'lowH_duration'] = (ltimes[-1] - ltimes[0])/1000/60
+    gdf.loc[jj,'highH_duration'] = (htimes[-1] - htimes[0])/1000/60
+    
+    atimes = two_arm24_df.time_elapsed.to_numpy()
+    gdf.loc[jj,'two_arm24_duration'] = (atimes[-1] - atimes[0])/1000/60
+    
+    atimes = two_arm28_df.time_elapsed.to_numpy()
+    gdf.loc[jj,'two_arm28_duration'] = (atimes[-1] - atimes[0])/1000/60
+    
+    gdf.loc[jj,'beads_ntrials'] = 375
+    gdf.loc[jj,'two_arm_ntrials'] = 125
+    
+    com_stay_rew = 0
+    com_rew_total = 0
+    rare_stay_rew = 0
+    rare_rew_total = 0
+    com_stay_norew = 0
+    com_norew_total = 0
+    rare_stay_norew = 0
+    rare_norew_total = 0
+    arm_exp_df = two_arm24_df.copy()
+    arm_exp_df.reset_index(inplace=True)
+    for t in range(1,len(arm_exp_df)):
+        if arm_exp_df.state1_action[t-1] == arm_exp_df.state2_visited[t-1]:
+            if arm_exp_df.rewarded[t-1] == 1:
+                com_rew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    com_stay_rew += 1
+            else:
+                com_norew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    com_stay_norew += 1
+        else:
+            if arm_exp_df.rewarded[t-1] == 1:
+                rare_rew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    rare_stay_rew += 1
+            else:
+                rare_norew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    rare_stay_norew += 1
+    
+    gdf.loc[jj,'com_rew_stay24'] = com_stay_rew
+    gdf.loc[jj,'rare_rew_stay24'] = rare_stay_rew
+    gdf.loc[jj,'com_norew_stay24'] = com_stay_norew
+    gdf.loc[jj,'rare_norew_stay24'] = rare_stay_norew
+    gdf.loc[jj,'com_rew_total24'] = com_rew_total
+    gdf.loc[jj,'rare_rew_total24'] = rare_rew_total
+    gdf.loc[jj,'com_norew_total24'] = com_norew_total
+    gdf.loc[jj,'rare_norew_total24'] = rare_norew_total
+    
+    com_stay_rew = 0
+    com_rew_total = 0
+    rare_stay_rew = 0
+    rare_rew_total = 0
+    com_stay_norew = 0
+    com_norew_total = 0
+    rare_stay_norew = 0
+    rare_norew_total = 0
+    arm_exp_df = two_arm28_df.copy()
+    arm_exp_df.reset_index(inplace=True)
+    for t in range(1,len(arm_exp_df)):
+        if arm_exp_df.state1_action[t-1] == arm_exp_df.state2_visited[t-1]:
+            if arm_exp_df.rewarded[t-1] == 1:
+                com_rew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    com_stay_rew += 1
+            else:
+                com_norew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    com_stay_norew += 1
+        else:
+            if arm_exp_df.rewarded[t-1] == 1:
+                rare_rew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    rare_stay_rew += 1
+            else:
+                rare_norew_total += 1
+                if arm_exp_df.state1_action[t] == arm_exp_df.state1_action[t-1]:
+                    rare_stay_norew += 1
+    
+    gdf.loc[jj,'com_rew_stay28'] = com_stay_rew
+    gdf.loc[jj,'rare_rew_stay28'] = rare_stay_rew
+    gdf.loc[jj,'com_norew_stay28'] = com_stay_norew
+    gdf.loc[jj,'rare_norew_stay28'] = rare_stay_norew
+    gdf.loc[jj,'com_rew_total28'] = com_rew_total
+    gdf.loc[jj,'rare_rew_total28'] = rare_rew_total
+    gdf.loc[jj,'com_norew_total28'] = com_norew_total
+    gdf.loc[jj,'rare_norew_total28'] = rare_norew_total
+    
+    fig1, axs1 = plt.subplots(1,2,figsize=(12, 2))
+    axs1[0].plot(lowH_exp_df.trial_number,lowH_exp_df.jar,color='r')
+    axs1[0].scatter(lowH_exp_df.trial_number,lowH_exp_df.choice,c='black',marker='|')
+    axs1[0].set_title('Low Hazard')
+    
+    axs1[1].scatter(highH_exp_df.trial_number,highH_exp_df.choice,c='black',marker='|')
+    axs1[1].set_title('High Hazard')
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_bead_choice_seq.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_bead_choice_seq.png', width=800)
+    
+    if gdf.first_two_arm_seq[jj] == 'seq24':
+        seq1 = '24'
+        seq24 = '1'
+        com_stay_rew1 = gdf.com_rew_stay24[jj]
+        com_rew_total1 = gdf.com_rew_total24[jj]
+        com_stay_norew1 = gdf.com_norew_stay24[jj]
+        com_norew_total1 = gdf.com_norew_total24[jj]
+        rare_stay_rew1 = gdf.rare_rew_stay24[jj]
+        rare_rew_total1 = gdf.rare_rew_total24[jj]
+        rare_stay_norew1 = gdf.rare_norew_stay24[jj]
+        rare_norew_total1 = gdf.rare_norew_total24[jj]
+        
+        seq2 = '28'
+        seq28 = '2'
+        com_stay_rew2 = gdf.com_rew_stay28[jj]
+        com_rew_total2 = gdf.com_rew_total28[jj]
+        com_stay_norew2 = gdf.com_norew_stay28[jj]
+        com_norew_total2 = gdf.com_norew_total28[jj]
+        rare_stay_rew2 = gdf.rare_rew_stay28[jj]
+        rare_rew_total2 = gdf.rare_rew_total28[jj]
+        rare_stay_norew2 = gdf.rare_norew_stay28[jj]
+        rare_norew_total2 = gdf.rare_norew_total28[jj]
+    else:
+        seq1 = '28'
+        seq28 = '1'
+        com_stay_rew1 = gdf.com_rew_stay28[jj]
+        com_rew_total1 = gdf.com_rew_total28[jj]
+        com_stay_norew1 = gdf.com_norew_stay28[jj]
+        com_norew_total1 = gdf.com_norew_total28[jj]
+        rare_stay_rew1 = gdf.rare_rew_stay28[jj]
+        rare_rew_total1 = gdf.rare_rew_total28[jj]
+        rare_stay_norew1 = gdf.rare_norew_stay28[jj]
+        rare_norew_total1 = gdf.rare_norew_total28[jj]
+        
+        seq2 = '24'
+        seq24 = '2'
+        com_stay_rew2 = gdf.com_rew_stay24[jj]
+        com_rew_total2 = gdf.com_rew_total24[jj]
+        com_stay_norew2 = gdf.com_norew_stay24[jj]
+        com_norew_total2 = gdf.com_norew_total24[jj]
+        rare_stay_rew2 = gdf.rare_rew_stay24[jj]
+        rare_rew_total2 = gdf.rare_rew_total24[jj]
+        rare_stay_norew2 = gdf.rare_norew_stay24[jj]
+        rare_norew_total2 = gdf.rare_norew_total24[jj]
+    
+    arm_exp_df = two_arm24_df.copy()
+    arm_seq_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
+    mdict = {
+        'f': 2,
+        'j': 3
+    }
+    
+    cdict = {
+        1: 'tab:blue',
+        2: 'tab:orange',
+        3: 'tab:green',
+        4: 'tab:red'
+    }
+    
+    fig2, axs2 = plt.subplots(1,2,figsize=(12, 3))
+    axs2[0].plot(arm_seq_df.Trial,np.array(arm_seq_df['S1_A_star'])+1,color='gray')
+    for choice in arm_exp_df.choice.unique():
+        axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
+                      arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
+                      marker=mdict['f'],
+                       c=cdict[choice])
+        axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
+                      arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
+                      marker=mdict['j'],
+                       c=cdict[choice])
+        
+    axs2[1].plot(arm_seq_df.Trial,np.array(arm_seq_df['S0_A_star'])+1,color='gray')
+    for action in arm_exp_df.state1_action.unique():
+        axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
+                       arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
+                       marker=mdict['f'],
+                       c='black')
+        axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
+                       arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
+                       marker=mdict['j'],
+                       c='black')
+        
+    axs2[0].set_title('State2 Choice')
+    axs2[1].set_title('State1 Choice')
+    plt.suptitle('Seq24, Block ' + seq24)
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm24_choice_seq.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm24_choice_seq.png', width=800)
+    
+    arm_exp_df = two_arm28_df.copy()
+    arm_seq_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
+    mdict = {
+        'f': 2,
+        'j': 3
+    }
+    
+    cdict = {
+        1: 'tab:blue',
+        2: 'tab:orange',
+        3: 'tab:green',
+        4: 'tab:red'
+    }
+    
+    fig2, axs2 = plt.subplots(1,2,figsize=(12, 3))
+    axs2[0].plot(arm_seq_df.Trial,np.array(arm_seq_df['S1_A_star'])+1,color='gray')
+    for choice in arm_exp_df.choice.unique():
+        axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
+                      arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'f')],
+                      marker=mdict['f'],
+                       c=cdict[choice])
+        axs2[0].scatter(arm_exp_df.trial_number[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
+                      arm_exp_df.choice[(arm_exp_df.choice == choice) & (arm_exp_df.state2_key == 'j')],
+                      marker=mdict['j'],
+                       c=cdict[choice])
+        
+    axs2[1].plot(arm_seq_df.Trial,np.array(arm_seq_df['S0_A_star'])+1,color='gray')
+    for action in arm_exp_df.state1_action.unique():
+        axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
+                       arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'f')],
+                       marker=mdict['f'],
+                       c='black')
+        axs2[1].scatter(arm_exp_df.trial_number[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
+                       arm_exp_df.state1_action[(arm_exp_df.state1_action == action) & (arm_exp_df.state2_key == 'j')],
+                       marker=mdict['j'],
+                       c='black')
+        
+    axs2[0].set_title('State2 Choice')
+    axs2[1].set_title('State1 Choice')
+    plt.suptitle('Seq28, Block ' + seq28)
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm28_choice_seq.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm28_choice_seq.png', width=800)
+        
+    fig5, axs5 = plt.subplots(1,2,figsize=(8,3))
+    labels = ['Reward','No Reward']
+    x = np.arange(len(labels))
+    width = 0.35
+    axs5[0].bar(x - width/2,[com_stay_rew1/com_rew_total1, com_stay_norew1/com_norew_total1],width,label='Common')
+    axs5[0].bar(x + width/2,[rare_stay_rew1/rare_rew_total1, rare_stay_norew1/rare_norew_total1],width,label='Rare')
+    axs5[0].set_xticks(x,labels)
+    axs5[0].legend()
+    axs5[0].set_ylabel('A1 Repeat Probability')
+    axs5[0].set_title('Block 1, Seq ' + seq1)
+    
+    axs5[1].bar(x - width/2,[com_stay_rew2/com_rew_total2, com_stay_norew2/com_norew_total2],width,label='Common')
+    axs5[1].bar(x + width/2,[rare_stay_rew2/rare_rew_total2, rare_stay_norew2/rare_norew_total2],width,label='Rare')
+    axs5[1].set_xticks(x,labels)
+    axs5[1].legend()
+    axs5[1].set_title('Block 2, Seq ' + seq2)
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm_stay_prob.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm_stay_prob.png', width=800)
+    
+    fig3, axs3 = plt.subplots()
+    axs3.hist(lowH_exp_df.rt,50,histtype='step')
+    axs3.hist(highH_exp_df.rt,50,histtype='step')
+    axs3.set_xlabel('Time (ms)')
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_beads_rt_hist.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_beads_rt_hist.png', width=800)
+    
+    fig4, axs4 = plt.subplots(1,2,figsize=(12,4))
+    axs4[0].hist(two_arm24_df.state1_rt,25,histtype='step')
+    axs4[0].hist(two_arm24_df.state2_rt,25,histtype='step')
+    axs4[0].set_xlabel('Time (ms)')
+    axs4[0].set_title('Seq 24')
+    
+    axs4[1].hist(two_arm28_df.state1_rt,25,histtype='step')
+    axs4[1].hist(two_arm28_df.state2_rt,25,histtype='step')
+    axs4[0].set_xlabel('Time (ms)')
+    axs4[0].set_title('Seq 28')
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm_rt_hist.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm_rt_hist.png', width=800)
+    
+    lowH_exp_df['hazard'] = 0
+    highH_exp_df['hazard'] = 1
+    task_feat1, feat_num = encode_task_variables(lowH_exp_df,['hazard','bead','bead','bead'],np.array([0,1,2,3]))
+    task_feat2, feat_num = encode_task_variables(highH_exp_df,['hazard','bead','bead','bead'],np.array([0,1,2,3]))
+    task_feat_all = np.concatenate((task_feat1,task_feat2))
+    
+    pred1 = lowH_exp_df.choice.to_numpy() - 1
+    pred1 = pred1[3:]
+    pred2 = highH_exp_df.choice.to_numpy() - 1
+    pred2 = pred2[3:]
+
+    predictions = np.concatenate((pred1,pred2))
+    gdf.loc[jj,'Ipast_beads'] = mutual_inf(task_feat_all,predictions)
+    
+    
+    task_feat_counts_0 = get_joint_counts(task_feat_all[predictions==0],feat_num)
+    task_feat_counts_1 = get_joint_counts(task_feat_all[predictions==1],feat_num)
+    x = np.arange(feat_num)
+    
+    fig6, axs6 = plt.subplots(figsize=(8,4))
+    axs6.bar(x-width/2,task_feat_counts_0,width,label='BlackPred')
+    axs6.bar(x+width/2,task_feat_counts_1,width,label='WhitePred')
+    # axs6.hist([task_feat_all[predictions==0],task_feat_all[predictions==1]],len(np.unique(task_feat_all)),histtype='bar',label=['BlackPred','WhitePred'])
+    axs6.set_ylabel('Counts')
+    axs6.set_xlabel('Joint Feature Distribution')
+    axs6.set_xticks(x)
+    axs6.legend()
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_beads_feature_joint_counts.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_beads_feature_joint_counts.png', width=800)
+    
+    arm_seq24_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
+    two_arm24_df['S0_A_star'] = arm_seq24_df['S0_A_star'].to_numpy()
+    arm_seq28_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
+    two_arm28_df['S0_A_star'] = arm_seq28_df['S0_A_star'].to_numpy()
+    
+    task_feat1, feat_num = encode_task_variables(two_arm24_df,['state1_action','rewarded','state2_visited','S0_A_star'],np.array([1,1,1,1]))
+    task_feat2, feat_num = encode_task_variables(two_arm28_df,['state1_action','rewarded','state2_visited','S0_A_star'],np.array([1,1,1,1]))
+    task_feat_all = np.concatenate((task_feat1,task_feat2))
+    
+    action1 = np.array(two_arm24_df.state1_action)[1:] - 1
+    action2 = np.array(two_arm28_df.state1_action)[1:] - 1
+    
+    actions = np.concatenate((action1,action2))
+    gdf.loc[jj,'Ipast_two_arm'] = mutual_inf(task_feat_all,actions)
+    
+    task_feat_counts_0 = get_joint_counts(task_feat_all[actions==0],feat_num)
+    task_feat_counts_1 = get_joint_counts(task_feat_all[actions==1],feat_num)
+    x = np.arange(feat_num)
+    
+    fig7, axs7 = plt.subplots(figsize=(8,4))
+    axs7.bar(x-width/2,task_feat_counts_0,width,label='Action1')
+    axs7.bar(x+width/2,task_feat_counts_1,width,label='Action2')
+    # axs7.hist([task_feat_all[actions==0],task_feat_all[actions==1]],len(np.unique(task_feat_all)),histtype='bar',label=['Action1','Action2'])
+    axs7.set_ylabel('Counts')
+    axs7.set_xlabel('Joint Feature Distribution')
+    axs7.set_xticks(x)
+    axs7.legend()
+    plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm_feature_joint_counts.png',dpi=150)
+    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm_feature_joint_counts.png', width=800)
+    
+    jj += 1
+    
+sjreport.save()
+
+#%% basic group analysis and figures
