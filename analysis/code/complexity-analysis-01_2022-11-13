@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Nov 13 12:26:45 2022
+
+@author: jparker
+"""
+
+import pandas as pd
+import numpy as np
+from scipy import stats
+from scipy.stats import spearmanr, entropy, pearsonr
+import scipy.io as spio
+#import statsmodels.formula.api as sm
+import sys, csv
+import os
+import quickHTML as qh
+import matplotlib.pyplot as plt
+import platform
+
+#%%
+
+######################
+## HELPER FUNCTIONS ##
+######################
+
+#Functions to creat labels
+def trial_label(x):
+    as_strings = [num.astype(str) for num in x]
+    return "".join(as_strings)
+
+def make_features(trials_data):
+    labeled_data = np.apply_along_axis(trial_label, 0, trials_data)
+    combos = np.unique(labeled_data)
+    string_to_index = dict(zip(combos, np.arange(len(combos))))
+    map_to_index = np.vectorize(lambda x: string_to_index[x])
+    mapped_data = map_to_index(labeled_data)
+    return mapped_data
+
+def get_marginal(x):
+    """
+    Helper function to compute and return marginal probability distribution for a 1d vector (x)
+    """
+    px = np.array([np.sum(x==xi) for xi in np.sort(np.unique(x))])/len(x)
+    return(px)
+
+def get_joint(x, y):
+    """
+    Computes joint probability distribution between 1d vectors x and y
+    """
+    #  set up dictionary for joint distribution (x-->y-->freq)
+    joint_x_y = {}
+    
+    for x_un in np.unique(x):
+        joint_x_y[x_un] = dict(zip(np.unique(y), np.zeros(len(np.unique(y)))))
+        
+#    populate dictionary 
+    for trial, x_val in enumerate(x):
+        y_val = y[trial]
+        joint_x_y[x_val][y_val] += 1
+        
+#   normalize to make distirbution  
+    joint_sum = sum(sum(list(c.values())) for c in list(joint_x_y.values()))
+    
+    for key1 in joint_x_y:
+        for key2 in joint_x_y[key1]:
+            joint_x_y[key1][key2] /= joint_sum
+            
+    return(joint_x_y)
+
+def mutual_inf(x, y):
+    """
+    Calculates the mutual information I(x;y)
+    Assuming x,y are both [n x 1] dimensional
+    """  
+#     Calculate marginal distributions
+    px = get_marginal(x)
+    py = get_marginal(y)
+    
+    
+    joint_x_y = get_joint(x,y)
+# calculate mutual information
+    mi = 0
+    
+    for n_x, x_un in enumerate(np.unique(x)):
+        pxi = px[n_x] # p(x)
+        
+        for n_y, y_un in enumerate(np.unique(y)):
+            pyi = py[n_y] # p(y)            
+            
+            joint_i = joint_x_y[x_un][y_un] # P(x,y)
+            
+            if ((pxi == 0) or (pyi == 0) or (joint_i ==0 )):
+                continue
+            else:
+                mi += joint_i * np.log2(joint_i/(pxi*pyi))
+                
+    return mi
+
+def encode_task_variables(df,feat_list,t_arr):
+    # Inputs:
+    #    df: dataframe with task variables
+    #    feat_list: list of feature names corresponding to dataframe column headers
+    #    t_arr: array of timepoints relative to current trial for each feature
+    #           (positive values correspond to how many trials ago)
+    #
+    # Outputs:
+    #    feat_arr: a numpy array of the features encoded into a single value per time point
+    assert len(feat_list) == len(t_arr)
+    
+    depth = np.max(t_arr)
+    feat_arr = np.zeros((len(df)-depth))
+    for f in range(len(feat_list)):
+        temp_arr = df[feat_list[f]].copy().to_numpy()
+        temp_arr = temp_arr[depth-t_arr[f]:len(temp_arr)-t_arr[f]]
+        if (np.max(temp_arr) == 2) & (np.min(temp_arr) == 1):
+            temp_arr = temp_arr - 1
+        feat_arr = feat_arr + (temp_arr*(2**f))
+        
+    joint_feat_num = 2**(f+1)
+    
+    # feat_counts = np.empty((2**(f+1)))
+    # for f in range(2**(f+1)):
+    #     feat_counts[f] = np.sum(feat_arr==f)
+        
+    return feat_arr, joint_feat_num
+
+def get_joint_counts(joint_feat_arr,joint_feat_num):
+    feat_counts = np.empty((joint_feat_num))
+    for f in range(joint_feat_num):
+        feat_counts[f] = np.sum(joint_feat_arr==f)
+    return feat_counts
+
+#%% load data
+if platform.system() == 'Windows':
+    rootdir = 'C:\\Users\\parja\\Projects\\cross-domain-model-complexity\\'
+    datadir = rootdir + 'data\\'
+    andir = rootdir + 'analysis\\'
+    figdir = rootdir + 'analysis\\figures\\group\\'
+    two_arm_seq24 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
+    two_arm_seq28 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
+    fig_pre = "file:///"
+else:
+    rootdir = '/home/jparker/Projects/cross-domain-model-complexity/'
+    datadir = rootdir + 'data/'
+    andir = rootdir + 'analysis/'
+    figdir = rootdir + 'analysis/figures/group/'
+    two_arm_seq24 = pd.read_csv(rootdir + 'tasks/two-arm-new/stimuli/seq24_optim.csv')
+    two_arm_seq28 = pd.read_csv(rootdir + 'tasks/two-arm-new/stimuli/seq28_optim.csv')
+    fig_pre = ''
+
+gdf = pd.read_csv(datadir + 'group_df.csv')
+sdf = pd.read_csv(datadir + 'all_sj_df.csv')
+
+#%% Ipast beads VS Ipast two arm
+from scipy.stats import rankdata
+
+pd.plotting.scatter_matrix(gdf[['Ipast_beads','Ipast_two_arm']])
+plt.savefig(figdir + 'group_Ipast-beads_vs_Ipast-two-arm.png',dpi=150)
+
+fig1, axs1 = plt.subplots()
+axs1.scatter(rankdata(gdf.Ipast_beads.to_numpy()),rankdata(gdf.Ipast_two_arm.to_numpy()))
+axs1.set_xlabel('Ipast_beads rank')
+axs1.set_ylabel('Ipast_two_arm rank')
+plt.savefig(figdir + 'group_Ipast-beads_rank_vs_Ipast-two-arm_rank.png',dpi=150)
+
+fig2, axs2 = plt.subplots()
+axs2.scatter(gdf.Ipast_beads[gdf['Ipast_two_arm'] < 0.1],gdf.Ipast_two_arm[gdf['Ipast_two_arm'] < 0.1])
+axs2.set_xlabel('Ipast_beads')
+axs2.set_ylabel('Ipast_two_arm')
+axs2.set_title('Only subjects with Ipast two arm < 0.1')
+plt.savefig(figdir + 'group_comp-IpastbeadsVSIpasttwoarm_by-IpasttwoarmLT0.1.png',dpi=150)
+
+#%% Ipast beads vs beads task variables
+
+gdf['beads_total_score'] = gdf['lowH_score'] + gdf['highH_score']
+gdf['beads_total_duration'] = gdf['lowH_duration'] + gdf['highH_duration']
+gdf['beads_task_first'] = np.nan
+gdf.loc[gdf['first_task'] == 'beads','beads_task_first'] = 1
+gdf.loc[gdf['first_task'] == 'two_arm','beads_task_first'] = 0
+gdf['beads_lowH_first'] = np.nan
+gdf.loc[gdf['first_bead_block'] == 'lowH','beads_lowH_first'] = 1
+gdf.loc[gdf['first_bead_block'] == 'highH','beads_lowH_first'] = 0
+
+beads_median_rts = sdf[sdf['task']=='beads'].groupby('subject')['rt'].median()
+gdf = gdf.join(beads_median_rts,on='subject')
+gdf.rename(columns={'rt':'beads_med_rt'},inplace=True)
+
+beads_cols = ['Ipast_beads','beads_total_score','beads_med_rt','beads_task_first','beads_lowH_first','beads_total_duration']
+
+plt.figure(figsize=(10,10))
+pd.plotting.scatter_matrix(gdf[beads_cols])
+plt.savefig(figdir + 'group_comp-allbeadsvars.png',dpi=150)
+
+#%% Ipast two arm vs two arm task vars
+gdf['two_arm_total_score'] = gdf['two_arm24_score'] + gdf['two_arm28_score']
+gdf['two_arm_total_duration'] = gdf['two_arm24_duration'] + gdf['two_arm28_duration']
+gdf['two_arm24_first'] = np.nan
+gdf.loc[gdf['first_two_arm_seq'] == 'seq24','two_arm24_first'] = 1
+gdf.loc[gdf['first_two_arm_seq'] == 'seq28','two_arm24_first'] = 0
+gdf['com_rew_stay_prob'] = (gdf['com_rew_stay24']+gdf['com_rew_stay28'])/(gdf['com_rew_total24']+gdf['com_rew_total28'])
+gdf['rare_rew_stay_prob'] = (gdf['rare_rew_stay24']+gdf['rare_rew_stay28'])/(gdf['rare_rew_total24']+gdf['rare_rew_total28'])
+gdf['com_norew_stay_prob'] = (gdf['com_norew_stay24']+gdf['com_norew_stay28'])/(gdf['com_norew_total24']+gdf['com_norew_total28'])
+gdf['rare_norew_stay_prob'] = (gdf['rare_norew_stay24']+gdf['rare_norew_stay28'])/(gdf['rare_norew_total24']+gdf['rare_norew_total28'])
+gdf['model_based_proxy'] = (gdf['com_rew_stay_prob']/gdf['rare_rew_stay_prob']) + (gdf['rare_norew_stay_prob']/gdf['com_norew_stay_prob'])
+
+two_arm_median_rts = sdf[sdf['task']=='two_arm'].groupby('subject')['state1_rt'].median()
+gdf = gdf.join(two_arm_median_rts,on='subject')
+gdf.rename(columns={'state1_rt':'two_arm_med_rt'},inplace=True)
+
+two_arm_cols = ['Ipast_two_arm','two_arm_total_score','two_arm_med_rt','beads_task_first','two_arm24_first','two_arm_total_duration','model_based_proxy']
+
+pd.plotting.scatter_matrix(gdf[two_arm_cols])
+
+#%% inter block consistency
+
+# two_arm_seq24.rename(columns={'Trial':'trial_number'},inplace=True)
+# two_arm_seq28.rename(columns={'Trial':'trial_number'},inplace=True)
+sdf['state1_choice_optim'] = np.nan
+for tt in sdf.trial_number[sdf['task']=='two_arm'].unique():
+    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq24')] = two_arm_seq24.loc[two_arm_seq24['Trial']==tt,'S0_A_star'].to_numpy()
+    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq28')] = two_arm_seq28.loc[two_arm_seq24['Trial']==tt,'S0_A_star'].to_numpy()
+
+Ipast_beads_block1 = []
+Ipast_beads_block2 = []
+Ipast_two_arm_block1 = []
+Ipast_two_arm_block2 = []
+for sj in sdf['subject'].unique():
+    sjdf = sdf[sdf['subject']==sj].copy()
+    
+    task_var, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)],['bead','bead','bead','bead'],np.array([1,2,3,4]))
+    preds = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)].to_numpy() - 1
+    preds = preds[4:]
+    Ipast_beads_block1.append(mutual_inf(task_var,preds))
+    
+    task_var, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)],['bead','bead','bead','bead'],np.array([1,2,3,4]))
+    preds = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)].to_numpy() - 1
+    preds = preds[4:]
+    Ipast_beads_block2.append(mutual_inf(task_var,preds))
+    
+    #['state1_action','rewarded','state2_visited','S0_A_star']
+    task_var, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)],['state1_choice','rewarded','state2','state1_choice_optim'],np.array([1,1,1,1]))
+    choices = sjdf.state1_choice[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)].to_numpy() - 1
+    choices = choices[1:]
+    Ipast_two_arm_block1.append(mutual_inf(task_var,choices))
+    
+    task_var, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)],['state1_choice','rewarded','state2','state1_choice_optim'],np.array([1,1,1,1]))
+    choices = sjdf.state1_choice[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)].to_numpy() - 1
+    choices = choices[1:]
+    Ipast_two_arm_block2.append(mutual_inf(task_var,choices))
+    
+fig3, axs3 = plt.subplots()
+axs3.plot(range(2),c='gray')
+axs3.scatter(Ipast_beads_block1,Ipast_beads_block2)
+axs3.set_xlabel('Ipast beads block 1')
+axs3.set_xlabel('Ipast beads block 2')
+
+fig4, axs4 = plt.subplots()
+axs4.plot(range(2),c='gray')
+axs4.scatter(Ipast_two_arm_block1,Ipast_two_arm_block2)
+axs4.set_xlabel('Ipast beads block 1')
+axs4.set_xlabel('Ipast beads block 2')

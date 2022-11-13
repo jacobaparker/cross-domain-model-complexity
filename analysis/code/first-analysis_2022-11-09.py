@@ -15,6 +15,7 @@ import sys, csv
 import os
 import quickHTML as qh
 import matplotlib.pyplot as plt
+import platform
 
 #%%
 
@@ -128,25 +129,37 @@ def get_joint_counts(joint_feat_arr,joint_feat_num):
     for f in range(joint_feat_num):
         feat_counts[f] = np.sum(joint_feat_arr==f)
     return feat_counts
+    
 
 #%% extract data, put in more useable forms, generate qc and summary figures
 #   for each subject
 
 skip_data_extract = False
 
-rootdir = 'C:\\Users\\parja\\Projects\\cross-domain-model-complexity\\'
-datadir = rootdir + 'data\\'
-andir = rootdir + 'analysis\\'
-figdir = rootdir + 'analysis\\figures\\'
+if platform.system() == 'Windows':
+    rootdir = 'C:\\Users\\parja\\Projects\\cross-domain-model-complexity\\'
+    datadir = rootdir + 'data\\'
+    andir = rootdir + 'analysis\\'
+    figdir = rootdir + 'analysis\\figures\\'
+    two_arm_seq24 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
+    two_arm_seq28 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
+    fig_pre = "file:///"
+else:
+    rootdir = '/home/jparker/Projects/cross-domain-model-complexity/'
+    datadir = rootdir + 'data/'
+    andir = rootdir + 'analysis/'
+    figdir = rootdir + 'analysis/figures/'
+    two_arm_seq24 = pd.read_csv(rootdir + 'tasks/two-arm-new/stimuli/seq24_optim.csv')
+    two_arm_seq28 = pd.read_csv(rootdir + 'tasks/two-arm-new/stimuli/seq28_optim.csv')
+    fig_pre = ''
 
 sjfiles = [sjfile for sjfile in os.listdir(datadir) if '.csv' in sjfile]
 goodfiles = []
 sjkey = {}
 
-two_arm_seq24 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
-two_arm_seq28 = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
-
 sjreport = qh.html(andir + 'subjects_qc_report.html', style='new')
+
+keys = ['f','j']
 
 gdf = pd.DataFrame({'subject': [],
                     'data_file': [],
@@ -206,11 +219,17 @@ all_sj_df = pd.DataFrame({'subject': [],
                     'state2_key': [],
                     'rewarded': [],
                     'state1_rt': [],
-                    'state2_rt': []
+                    'state2_rt': [],
+                    'state1_option1_key': [],
+                    'state1_option2_key': [],
+                    'state2_option1_key': [],
+                    'state2_option2_key': [],
+                    'state2_option3_key': [],
+                    'state2_option4_key': [],
+                    'state1_choice_optim': []
                     })
 
-beads_sjdf_list = []
-two_arm_sjdf_list = []
+file1 = open(datadir + 'list_of_good_files.csv','w')
 
 jj = 0
 for sjfile in sjfiles:
@@ -226,6 +245,8 @@ for sjfile in sjfiles:
         
     except:
         continue
+    
+    file1.write(sjfile + ',\n')
         
     sjreport.write_header('SJ' + str(jj+1) + ', PID:' + sjdf.subject_id[0])
     sjreport.write_text('File: ' + sjfile)
@@ -368,7 +389,7 @@ for sjfile in sjfiles:
     axs1[1].scatter(highH_exp_df.trial_number,highH_exp_df.choice,c='black',marker='|')
     axs1[1].set_title('High Hazard')
     plt.savefig(figdir + 'sj' + str(jj+1) + '_bead_choice_seq.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_bead_choice_seq.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_bead_choice_seq.png', width=800)
     
     if gdf.first_two_arm_seq[jj] == 'seq24':
         seq1 = '24'
@@ -416,7 +437,7 @@ for sjfile in sjfiles:
         rare_norew_total2 = gdf.rare_norew_total24[jj]
     
     arm_exp_df = two_arm24_df.copy()
-    arm_seq_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
+    arm_seq_df = two_arm_seq24.copy()
     mdict = {
         'f': 2,
         'j': 3
@@ -456,10 +477,10 @@ for sjfile in sjfiles:
     axs2[1].set_title('State1 Choice')
     plt.suptitle('Seq24, Block ' + seq24)
     plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm24_choice_seq.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm24_choice_seq.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_two_arm24_choice_seq.png', width=800)
     
     arm_exp_df = two_arm28_df.copy()
-    arm_seq_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
+    arm_seq_df = two_arm_seq28.copy()
     mdict = {
         'f': 2,
         'j': 3
@@ -499,7 +520,7 @@ for sjfile in sjfiles:
     axs2[1].set_title('State1 Choice')
     plt.suptitle('Seq28, Block ' + seq28)
     plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm28_choice_seq.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm28_choice_seq.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_two_arm28_choice_seq.png', width=800)
         
     fig5, axs5 = plt.subplots(1,2,figsize=(8,3))
     labels = ['Reward','No Reward']
@@ -518,14 +539,14 @@ for sjfile in sjfiles:
     axs5[1].legend()
     axs5[1].set_title('Block 2, Seq ' + seq2)
     plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm_stay_prob.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm_stay_prob.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_two_arm_stay_prob.png', width=800)
     
     fig3, axs3 = plt.subplots()
     axs3.hist(lowH_exp_df.rt,50,histtype='step')
     axs3.hist(highH_exp_df.rt,50,histtype='step')
     axs3.set_xlabel('Time (ms)')
     plt.savefig(figdir + 'sj' + str(jj+1) + '_beads_rt_hist.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_beads_rt_hist.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_beads_rt_hist.png', width=800)
     
     fig4, axs4 = plt.subplots(1,2,figsize=(12,4))
     axs4[0].hist(two_arm24_df.state1_rt,25,histtype='step')
@@ -538,7 +559,7 @@ for sjfile in sjfiles:
     axs4[0].set_xlabel('Time (ms)')
     axs4[0].set_title('Seq 28')
     plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm_rt_hist.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm_rt_hist.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_two_arm_rt_hist.png', width=800)
     
     lowH_exp_df['hazard'] = 0
     highH_exp_df['hazard'] = 1
@@ -568,11 +589,11 @@ for sjfile in sjfiles:
     axs6.set_xticks(x)
     axs6.legend()
     plt.savefig(figdir + 'sj' + str(jj+1) + '_beads_feature_joint_counts.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_beads_feature_joint_counts.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_beads_feature_joint_counts.png', width=800)
     
-    arm_seq24_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq24_optim.csv')
+    arm_seq24_df = two_arm_seq24.copy()
     two_arm24_df['S0_A_star'] = arm_seq24_df['S0_A_star'].to_numpy()
-    arm_seq28_df = pd.read_csv(rootdir + 'tasks\\two-arm-new\\stimuli\\seq28_optim.csv')
+    arm_seq28_df = two_arm_seq28.copy()
     two_arm28_df['S0_A_star'] = arm_seq28_df['S0_A_star'].to_numpy()
     
     task_feat1, feat_num = encode_task_variables(two_arm24_df,['state1_action','rewarded','state2_visited','S0_A_star'],np.array([1,1,1,1]))
@@ -598,7 +619,7 @@ for sjfile in sjfiles:
     axs7.set_xticks(x)
     axs7.legend()
     plt.savefig(figdir + 'sj' + str(jj+1) + '_two_arm_feature_joint_counts.png',dpi=150)
-    sjreport.write_figure("file:///" + figdir + 'sj' + str(jj+1) + '_two_arm_feature_joint_counts.png', width=800)
+    sjreport.write_figure(fig_pre + figdir + 'sj' + str(jj+1) + '_two_arm_feature_joint_counts.png', width=800)
     
     sdf = pd.DataFrame({'subject': [],
                         'data_file': [],
@@ -621,8 +642,46 @@ for sjfile in sjfiles:
                         'state2_key': [],
                         'rewarded': [],
                         'state1_rt': [],
-                        'state2_rt': []
+                        'state2_rt': [],
+                        'state1_option1_key': [],
+                        'state1_option2_key': [],
+                        'state2_option1_key': [],
+                        'state2_option2_key': [],
+                        'state2_option3_key': [],
+                        'state2_option4_key': [],
+                        'state1_choice_optim': []
                         })
+    
+    sdf_cols = ['subject',
+                'data_file',
+                'task',
+                'task_num',
+                'block_label',
+                'block_num',
+                'trial_number',
+                'hazard_rate',
+                'jar',
+                'bead',
+                'choice',
+                'correct',
+                'rt',
+                'score',
+                'state1_choice',
+                'state1_key',
+                'state2',
+                'state2_choice',
+                'state2_key',
+                'rewarded',
+                'state1_rt',
+                'state2_rt',
+                'state1_option1_key',
+                'state1_option2_key',
+                'state2_option1_key',
+                'state2_option2_key',
+                'state2_option3_key',
+                'state2_option4_key',
+                'state1_choice_optim'
+                ]
     
     lowH_exp_df['subject'] = jj + 1
     lowH_exp_df['data_file'] = sjfile
@@ -632,8 +691,14 @@ for sjfile in sjfiles:
     lowH_exp_df['hazard_rate'] = 0.01
     lowH_exp_df['score'] = lowH_exp_df['correct'].cumsum()
     lowH_exp_df['state2_choice'] = np.nan
+    lowH_exp_df['state1_option1_key'] = np.nan
+    lowH_exp_df['state1_option2_key'] = np.nan
+    lowH_exp_df['state2_option1_key'] = np.nan
+    lowH_exp_df['state2_option2_key'] = np.nan
+    lowH_exp_df['state2_option3_key'] = np.nan
+    lowH_exp_df['state2_option4_key'] = np.nan
     
-    lowH_exp_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'})
+    lowH_exp_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'}, inplace = True)
     
     if gdf.first_task[jj] == 'beads':
         lowH_exp_df['task_num'] = 1
@@ -653,8 +718,14 @@ for sjfile in sjfiles:
     highH_exp_df['hazard_rate'] = 0.99
     highH_exp_df['score'] = highH_exp_df['correct'].cumsum()
     highH_exp_df['state2_choice'] = np.nan
+    highH_exp_df['state1_option1_key'] = np.nan
+    highH_exp_df['state1_option2_key'] = np.nan
+    highH_exp_df['state2_option1_key'] = np.nan
+    highH_exp_df['state2_option2_key'] = np.nan
+    highH_exp_df['state2_option3_key'] = np.nan
+    highH_exp_df['state2_option4_key'] = np.nan
     
-    highH_exp_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'})
+    highH_exp_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'}, inplace = True)
     
     if gdf.first_task[jj] == 'beads':
         highH_exp_df['task_num'] = 1
@@ -672,9 +743,39 @@ for sjfile in sjfiles:
     two_arm24_df['block_label'] = 'seq24'
     two_arm24_df['hazard_rate'] = np.nan
     two_arm24_df['score'] = two_arm24_df['rewarded'].cumsum()
-    two_arm24_df['state2_choice'] = np.nan
+    two_arm24_df['state2_choice'] = two_arm24_df['choice']
+    two_arm24_df['state1_option1_key'] = np.nan
+    two_arm24_df['state1_option2_key'] = np.nan
+    two_arm24_df['state2_option1_key'] = np.nan
+    two_arm24_df['state2_option2_key'] = np.nan
+    two_arm24_df['state2_option3_key'] = np.nan
+    two_arm24_df['state2_option4_key'] = np.nan
     
-    two_arm24_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'})
+    two_arm24_df.loc[two_arm24_df['state1_action']==1,'state1_option1_key'] = two_arm24_df['state1_key']
+    two_arm24_df.loc[(two_arm24_df['state1_action']==2) & (two_arm24_df['state1_key'] == 'f'),'state1_option1_key'] = 'j'
+    two_arm24_df.loc[(two_arm24_df['state1_action']==2) & (two_arm24_df['state1_key'] == 'j'),'state1_option1_key'] = 'f'
+    
+    two_arm24_df.loc[two_arm24_df['state1_action']==2,'state1_option2_key'] = two_arm24_df['state1_key']
+    two_arm24_df.loc[(two_arm24_df['state1_action']==1) & (two_arm24_df['state1_key'] == 'f'),'state1_option2_key'] = 'j'
+    two_arm24_df.loc[(two_arm24_df['state1_action']==1) & (two_arm24_df['state1_key'] == 'j'),'state1_option2_key'] = 'f'
+    
+    two_arm24_df.loc[two_arm24_df['state2_choice']==1,'state2_option1_key'] = two_arm24_df['state2_key']
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==2) & (two_arm24_df['state2_key'] == 'f'),'state2_option1_key'] = 'j'
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==2) & (two_arm24_df['state2_key'] == 'j'),'state2_option1_key'] = 'f'
+    
+    two_arm24_df.loc[two_arm24_df['state2_choice']==2,'state2_option2_key'] = two_arm24_df['state2_key']
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==1) & (two_arm24_df['state2_key'] == 'f'),'state2_option2_key'] = 'j'
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==1) & (two_arm24_df['state2_key'] == 'j'),'state2_option2_key'] = 'f'
+    
+    two_arm24_df.loc[two_arm24_df['state2_choice']==3,'state2_option3_key'] = two_arm24_df['state2_key']
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==4) & (two_arm24_df['state2_key'] == 'f'),'state2_option3_key'] = 'j'
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==4) & (two_arm24_df['state2_key'] == 'j'),'state2_option3_key'] = 'f'
+    
+    two_arm24_df.loc[two_arm24_df['state2_choice']==4,'state2_option4_key'] = two_arm24_df['state2_key']
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==3) & (two_arm24_df['state2_key'] == 'f'),'state2_option4_key'] = 'j'
+    two_arm24_df.loc[(two_arm24_df['state2_choice']==3) & (two_arm24_df['state2_key'] == 'j'),'state2_option4_key'] = 'f'
+    
+    two_arm24_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'}, inplace = True)
     
     if gdf.first_task[jj] == 'two_arm':
         two_arm24_df['task_num'] = 1
@@ -692,9 +793,39 @@ for sjfile in sjfiles:
     two_arm28_df['block_label'] = 'seq28'
     two_arm28_df['hazard_rate'] = np.nan
     two_arm28_df['score'] = two_arm28_df['rewarded'].cumsum()
-    two_arm28_df['state2_choice'] = np.nan
+    two_arm28_df['state2_choice'] = two_arm28_df['choice']
+    two_arm28_df['state1_option1_key'] = np.nan
+    two_arm28_df['state1_option2_key'] = np.nan
+    two_arm28_df['state2_option1_key'] = np.nan
+    two_arm28_df['state2_option2_key'] = np.nan
+    two_arm28_df['state2_option3_key'] = np.nan
+    two_arm28_df['state2_option4_key'] = np.nan
     
-    two_arm28_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'})
+    two_arm28_df.loc[two_arm28_df['state1_action']==1,'state1_option1_key'] = two_arm28_df['state1_key']
+    two_arm28_df.loc[(two_arm28_df['state1_action']==2) & (two_arm28_df['state1_key'] == 'f'),'state1_option1_key'] = 'j'
+    two_arm28_df.loc[(two_arm28_df['state1_action']==2) & (two_arm28_df['state1_key'] == 'j'),'state1_option1_key'] = 'f'
+    
+    two_arm28_df.loc[two_arm28_df['state1_action']==2,'state1_option2_key'] = two_arm28_df['state1_key']
+    two_arm28_df.loc[(two_arm28_df['state1_action']==1) & (two_arm28_df['state1_key'] == 'f'),'state1_option2_key'] = 'j'
+    two_arm28_df.loc[(two_arm28_df['state1_action']==1) & (two_arm28_df['state1_key'] == 'j'),'state1_option2_key'] = 'f'
+    
+    two_arm28_df.loc[two_arm28_df['state2_choice']==1,'state2_option1_key'] = two_arm28_df['state2_key']
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==2) & (two_arm28_df['state2_key'] == 'f'),'state2_option1_key'] = 'j'
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==2) & (two_arm28_df['state2_key'] == 'j'),'state2_option1_key'] = 'f'
+    
+    two_arm28_df.loc[two_arm28_df['state2_choice']==2,'state2_option2_key'] = two_arm28_df['state2_key']
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==1) & (two_arm28_df['state2_key'] == 'f'),'state2_option2_key'] = 'j'
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==1) & (two_arm28_df['state2_key'] == 'j'),'state2_option2_key'] = 'f'
+    
+    two_arm28_df.loc[two_arm28_df['state2_choice']==3,'state2_option3_key'] = two_arm28_df['state2_key']
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==4) & (two_arm28_df['state2_key'] == 'f'),'state2_option3_key'] = 'j'
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==4) & (two_arm28_df['state2_key'] == 'j'),'state2_option3_key'] = 'f'
+    
+    two_arm28_df.loc[two_arm28_df['state2_choice']==4,'state2_option4_key'] = two_arm28_df['state2_key']
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==3) & (two_arm28_df['state2_key'] == 'f'),'state2_option4_key'] = 'j'
+    two_arm28_df.loc[(two_arm28_df['state2_choice']==3) & (two_arm28_df['state2_key'] == 'j'),'state2_option4_key'] = 'f'
+    
+    two_arm28_df.rename(columns={'state1_action':'state1_choice', 'state2_visited':'state2'}, inplace = True)
     
     if gdf.first_task[jj] == 'two_arm':
         two_arm28_df['task_num'] = 1
@@ -705,12 +836,26 @@ for sjfile in sjfiles:
         two_arm28_df['block_num'] = 1
     else:
         two_arm28_df['block_num'] = 2
+        
     
+    if gdf.first_bead_block[jj] == 'lowH':
+        sdf = pd.concat([sdf,lowH_exp_df[sdf_cols],highH_exp_df[sdf_cols]],ignore_index=True)
+    else:
+        sdf = pd.concat([sdf,highH_exp_df[sdf_cols],lowH_exp_df[sdf_cols]],ignore_index=True)
+        
+    if gdf.first_two_arm_seq[jj] == 'seq24':
+        sdf = pd.concat([sdf,two_arm24_df[sdf_cols],two_arm28_df[sdf_cols]],ignore_index=True)
+    else:
+        sdf = pd.concat([sdf,two_arm28_df[sdf_cols],two_arm24_df[sdf_cols]],ignore_index=True)
+        
+    all_sj_df = pd.concat([all_sj_df,sdf],ignore_index=True)
     
     jj += 1
     
 sjreport.save()
 gdf.to_csv(path_or_buf=datadir + 'group_df.csv')
+all_sj_df.to_csv(path_or_buf=datadir + 'all_sj_df.csv')
+file1.close()
 
 #%% basic group analysis and figures
 from scipy.stats import rankdata
