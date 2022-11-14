@@ -219,12 +219,17 @@ pd.plotting.scatter_matrix(gdf[two_arm_cols])
 sdf['state1_choice_optim'] = np.nan
 for tt in sdf.trial_number[sdf['task']=='two_arm'].unique():
     sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq24')] = two_arm_seq24.loc[two_arm_seq24['Trial']==tt,'S0_A_star'].to_numpy()
-    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq28')] = two_arm_seq28.loc[two_arm_seq24['Trial']==tt,'S0_A_star'].to_numpy()
+    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq28')] = two_arm_seq28.loc[two_arm_seq28['Trial']==tt,'S0_A_star'].to_numpy()
 
 Ipast_beads_block1 = []
 Ipast_beads_block2 = []
+Ipast_beads_lowH = []
+Ipast_beads_highH = []
 Ipast_two_arm_block1 = []
 Ipast_two_arm_block2 = []
+two_arm_MIs = []
+lowH_MIs = []
+highH_MIs = []
 for sj in sdf['subject'].unique():
     sjdf = sdf[sdf['subject']==sj].copy()
     
@@ -238,6 +243,24 @@ for sj in sdf['subject'].unique():
     preds = preds[4:]
     Ipast_beads_block2.append(mutual_inf(task_var,preds))
     
+    task_var, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_label'] == 'lowH')],['bead','bead','bead','bead'],np.array([1,2,3,4]))
+    preds = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_label'] == 'lowH')].to_numpy() - 1
+    preds = preds[4:]
+    Ipast_beads_lowH.append(mutual_inf(task_var,preds))
+    
+    actual = sjdf.bead[(sjdf['task'] == 'beads') & (sjdf['block_label'] == 'lowH')].to_numpy() - 1
+    actual = actual[4:]
+    lowH_MIs.append(mutual_inf(task_var,actual))
+    
+    task_var, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_label'] == 'highH')],['bead','bead','bead','bead'],np.array([1,2,3,4]))
+    preds = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_label'] == 'highH')].to_numpy() - 1
+    preds = preds[4:]
+    Ipast_beads_highH.append(mutual_inf(task_var,preds))
+    
+    actual = sjdf.bead[(sjdf['task'] == 'beads') & (sjdf['block_label'] == 'highH')].to_numpy() - 1
+    actual = actual[4:]
+    highH_MIs.append(mutual_inf(task_var,actual))
+    
     #['state1_action','rewarded','state2_visited','S0_A_star']
     task_var, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)],['state1_choice','rewarded','state2','state1_choice_optim'],np.array([1,1,1,1]))
     choices = sjdf.state1_choice[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)].to_numpy() - 1
@@ -249,14 +272,33 @@ for sj in sdf['subject'].unique():
     choices = choices[1:]
     Ipast_two_arm_block2.append(mutual_inf(task_var,choices))
     
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)],['state1_choice','rewarded','state2','state1_choice_optim'],np.array([1,1,1,1]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)],['state1_choice','rewarded','state2','state1_choice_optim'],np.array([1,1,1,1]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    optim1 = sjdf.state1_choice_optim[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)].to_numpy() - 1
+    optim2 = sjdf.state1_choice_optim[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)].to_numpy() - 1
+    optim1 = optim1[1:]
+    optim2 = optim2[1:]
+    optim = np.concatenate((optim1,optim2))
+    
+    two_arm_MIs.append(mutual_inf(task_var,optim))
+    
+    
 fig3, axs3 = plt.subplots()
 axs3.plot(range(2),c='gray')
 axs3.scatter(Ipast_beads_block1,Ipast_beads_block2)
 axs3.set_xlabel('Ipast beads block 1')
-axs3.set_xlabel('Ipast beads block 2')
+axs3.set_ylabel('Ipast beads block 2')
 
 fig4, axs4 = plt.subplots()
 axs4.plot(range(2),c='gray')
 axs4.scatter(Ipast_two_arm_block1,Ipast_two_arm_block2)
-axs4.set_xlabel('Ipast beads block 1')
-axs4.set_xlabel('Ipast beads block 2')
+axs4.set_xlabel('Ipast two arm block 1')
+axs4.set_ylabel('Ipast two arm block 2')
+
+fig5, axs5 = plt.subplots()
+axs5.plot(range(2),c='gray')
+axs5.scatter(Ipast_beads_lowH,Ipast_beads_highH)
+axs5.set_xlabel('Ipast beads low Hazard')
+axs5.set_ylabel('Ipast beads high Hazard')
