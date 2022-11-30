@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-seqnum = 24
+seqnum = 28
 
 tdf = pd.read_csv("stimuli/seq"+str(seqnum)+".csv")
 

@@ -155,8 +155,11 @@ sdf = pd.read_csv(datadir + 'all_sj_df.csv')
 #%% Ipast beads VS Ipast two arm
 from scipy.stats import rankdata
 
-pd.plotting.scatter_matrix(gdf[['Ipast_beads','Ipast_two_arm']])
+gdf.plot.scatter('Ipast_beads','Ipast_two_arm',figsize=(6,4))
 plt.savefig(figdir + 'group_Ipast-beads_vs_Ipast-two-arm.png',dpi=150)
+
+pd.plotting.scatter_matrix(gdf[['Ipast_beads','Ipast_two_arm']])
+plt.savefig(figdir + 'group_Ipast-beads_vs_Ipast-two-arm_matrix.png',dpi=150)
 
 fig1, axs1 = plt.subplots()
 axs1.scatter(rankdata(gdf.Ipast_beads.to_numpy()),rankdata(gdf.Ipast_two_arm.to_numpy()))
@@ -188,9 +191,8 @@ gdf.rename(columns={'rt':'beads_med_rt'},inplace=True)
 
 beads_cols = ['Ipast_beads','beads_total_score','beads_med_rt','beads_task_first','beads_lowH_first','beads_total_duration']
 
-plt.figure(figsize=(10,10))
-pd.plotting.scatter_matrix(gdf[beads_cols])
-plt.savefig(figdir + 'group_comp-allbeadsvars.png',dpi=150)
+pd.plotting.scatter_matrix(gdf[beads_cols],figsize=(12,12),s=100)
+plt.savefig(figdir + 'group_comp-allbeadsvars.png',dpi=100)
 
 #%% Ipast two arm vs two arm task vars
 gdf['two_arm_total_score'] = gdf['two_arm24_score'] + gdf['two_arm28_score']
@@ -290,15 +292,157 @@ axs3.plot(range(2),c='gray')
 axs3.scatter(Ipast_beads_block1,Ipast_beads_block2)
 axs3.set_xlabel('Ipast beads block 1')
 axs3.set_ylabel('Ipast beads block 2')
+plt.savefig(figdir + 'group_Ipast-beads_block1_vs_Ipast-beads_block2.png',dpi=150)
 
 fig4, axs4 = plt.subplots()
 axs4.plot(range(2),c='gray')
 axs4.scatter(Ipast_two_arm_block1,Ipast_two_arm_block2)
 axs4.set_xlabel('Ipast two arm block 1')
 axs4.set_ylabel('Ipast two arm block 2')
+plt.savefig(figdir + 'group_Ipast-two_arm_block1_vs_Ipast-two-arm_block2.png',dpi=150)
 
 fig5, axs5 = plt.subplots()
 axs5.plot(range(2),c='gray')
 axs5.scatter(Ipast_beads_lowH,Ipast_beads_highH)
 axs5.set_xlabel('Ipast beads low Hazard')
 axs5.set_ylabel('Ipast beads high Hazard')
+plt.savefig(figdir + 'group_Ipast-beads_lowH_vs_Ipast-beads_highH.png',dpi=150)
+
+#%% two arm rank
+gdf['Ipast_two_arm_rank'] = gdf['Ipast_two_arm'].rank()
+
+two_arm_cols_rank = ['Ipast_two_arm_rank','two_arm_total_score','two_arm_med_rt','beads_task_first','two_arm24_first','two_arm_total_duration','model_based_proxy']
+
+pd.plotting.scatter_matrix(gdf[two_arm_cols_rank],figsize=(14,14),s=100)
+plt.savefig(figdir + 'group_comp-all_two-arm_vars_rank.png',dpi=100)
+
+#%%
+gdf['Ipast_beads_H'] = np.nan
+gdf['Ipast_beads_b1'] = np.nan
+gdf['Ipast_beads_b2'] = np.nan
+gdf['Ipast_beads_b3'] = np.nan
+
+gdf['Ipast_two_arm_S1A'] = np.nan
+gdf['Ipast_two_arm_R'] = np.nan
+gdf['Ipast_two_arm_S2'] = np.nan
+gdf['Ipast_two_arm_S1Aoptim'] = np.nan
+
+for sj in sdf['subject'].unique():
+    sjdf = sdf[sdf['subject']==sj].copy()
+    
+    # Hazard
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)],['bead','bead','bead'],np.array([1,2,3]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)],['bead','bead','bead'],np.array([1,2,3]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    preds1 = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)].to_numpy() - 1
+    preds1 = preds1[3:]
+    preds2 = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)].to_numpy() - 1
+    preds2 = preds2[3:]
+    preds = np.concatenate((preds1,preds2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_beads_H'] = gdf.loc[gdf['subject']==sj,'Ipast_beads'] - mutual_inf(task_var,preds)
+    
+    # bead t-1
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)],['hazard_rate','bead','bead'],np.array([0,2,3]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)],['hazard_rate','bead','bead'],np.array([0,2,3]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_beads_b1'] = gdf.loc[gdf['subject']==sj,'Ipast_beads'] - mutual_inf(task_var,preds)
+    
+    # bead t-2
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)],['hazard_rate','bead','bead'],np.array([0,1,3]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)],['hazard_rate','bead','bead'],np.array([0,1,3]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_beads_b2'] = gdf.loc[gdf['subject']==sj,'Ipast_beads'] - mutual_inf(task_var,preds)
+    
+    # bead t-3
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)],['hazard_rate','bead','bead'],np.array([0,1,2]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)],['hazard_rate','bead','bead'],np.array([0,1,2]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    preds1 = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 1)].to_numpy() - 1
+    preds1 = preds1[2:]
+    preds2 = sjdf.choice[(sjdf['task'] == 'beads') & (sjdf['block_num'] == 2)].to_numpy() - 1
+    preds2 = preds2[2:]
+    preds = np.concatenate((preds1,preds2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_beads_b3'] = gdf.loc[gdf['subject']==sj,'Ipast_beads'] - mutual_inf(task_var,preds)
+    
+    #two arm
+    #S1 choice t-1
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)],['rewarded','state2','state1_choice_optim'],np.array([1,1,1]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)],['rewarded','state2','state1_choice_optim'],np.array([1,1,1]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    choices1 = sjdf.state1_choice[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)].to_numpy() - 1
+    choices1 = choices1[1:]
+    choices2 = sjdf.state1_choice[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)].to_numpy() - 1
+    choices2 = choices2[1:]
+    choices = np.concatenate((choices1,choices2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_two_arm_S1A'] = gdf.loc[gdf['subject']==sj,'Ipast_two_arm'] - mutual_inf(task_var,choices)
+    
+    #R t-1
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)],['state1_choice','state2','state1_choice_optim'],np.array([1,1,1]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)],['state1_choice','state2','state1_choice_optim'],np.array([1,1,1]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_two_arm_R'] = gdf.loc[gdf['subject']==sj,'Ipast_two_arm'] - mutual_inf(task_var,choices)
+    
+    #S2 t-1
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)],['state1_choice','rewarded','state1_choice_optim'],np.array([1,1,1]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)],['state1_choice','rewarded','state1_choice_optim'],np.array([1,1,1]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_two_arm_S2'] = gdf.loc[gdf['subject']==sj,'Ipast_two_arm'] - mutual_inf(task_var,choices)
+    
+    #S1A optim t-1
+    task_var1, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 1)],['state1_choice','rewarded','state2'],np.array([1,1,1]))
+    task_var2, feat_num = encode_task_variables(sjdf[(sjdf['task'] == 'two_arm') & (sjdf['block_num'] == 2)],['state1_choice','rewarded','state2'],np.array([1,1,1]))
+    task_var = np.concatenate((task_var1,task_var2))
+    
+    gdf.loc[gdf['subject']==sj,'Ipast_two_arm_S1Aoptim'] = gdf.loc[gdf['subject']==sj,'Ipast_two_arm'] - mutual_inf(task_var,choices)
+    
+# fig6, axs6 = plt.subplots(2,2,figsize=(6,6))
+gdf.plot(x='Ipast_beads',y='beads_total_score',kind='scatter')
+plt.savefig(figdir + 'group_Ipast_beads_VS_beads_score.png',dpi=150)
+gdf.plot(x='Ipast_beads',y='beads_total_score',c='Ipast_beads_H',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_beads_H_VS_beads_score.png',dpi=150)
+gdf.plot(x='Ipast_beads',y='beads_total_score',c='Ipast_beads_b1',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_beads_b1_VS_beads_score.png',dpi=150)
+gdf.plot(x='Ipast_beads',y='beads_total_score',c='Ipast_beads_b2',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_beads_b2_VS_beads_score.png',dpi=150)
+gdf.plot(x='Ipast_beads',y='beads_total_score',c='Ipast_beads_b3',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_beads_b3_VS_beads_score.png',dpi=150)
+
+gdf.loc[7,'Ipast_two_arm_R'] = np.nan
+gdf.loc[7,'Ipast_two_arm_S1Aoptim'] = np.nan
+gdf.plot(x='Ipast_two_arm',y='two_arm_total_score',kind='scatter')
+plt.savefig(figdir + 'group_Ipast_two_arm_VS_two_arm_score.png',dpi=150)
+gdf.plot(x='Ipast_two_arm',y='two_arm_med_rt',kind='scatter')
+plt.savefig(figdir + 'group_Ipast_two_arm_VS_two_arm_rt.png',dpi=150)
+gdf.plot(x='Ipast_two_arm',y='two_arm_total_score',c='Ipast_two_arm_S1A',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_two_arm_S1A_VS_two_arm_score.png',dpi=150)
+gdf.plot(x='Ipast_two_arm',y='two_arm_total_score',c='Ipast_two_arm_R',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_two_arm_R_VS_two_arm_score.png',dpi=150)
+gdf.plot(x='Ipast_two_arm',y='two_arm_total_score',c='Ipast_two_arm_S2',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_two_arm_S2_VS_two_arm_score.png',dpi=150)
+gdf.plot(x='Ipast_two_arm',y='two_arm_total_score',c='Ipast_two_arm_S1Aoptim',kind='scatter',cmap='viridis')
+plt.savefig(figdir + 'group_Ipast_two_arm_S1Aoptim_VS_two_arm_score.png',dpi=150)
+
+gdf.plot(x='Ipast_two_arm_rank',y='two_arm_total_score',kind='scatter')
+plt.savefig(figdir + 'group_Ipast_two_arm_rank_VS_two_arm_score.png',dpi=150)
+gdf.plot(x='Ipast_two_arm_rank',y='two_arm_med_rt',kind='scatter')
+plt.savefig(figdir + 'group_Ipast_two_arm_rank_VS_two_arm_rt.png',dpi=150)
+gdf.plot(x='Ipast_two_arm_rank',y='two_arm_total_score',c='Ipast_two_arm_S1A',kind='scatter',cmap='viridis')
+gdf.plot(x='Ipast_two_arm_rank',y='two_arm_total_score',c='Ipast_two_arm_R',kind='scatter',cmap='viridis')
+gdf.plot(x='Ipast_two_arm_rank',y='two_arm_total_score',c='Ipast_two_arm_S2',kind='scatter',cmap='viridis')
+gdf.plot(x='Ipast_two_arm_rank',y='two_arm_total_score',c='Ipast_two_arm_S1Aoptim',kind='scatter',cmap='viridis')
+
+
+gdf.plot(x='Ipast_two_arm',y='two_arm_total_score',c='model_based_proxy',kind='scatter',cmap='viridis')
+gdf.plot(x='Ipast_two_arm_rank',y='two_arm_total_score',c='model_based_proxy',kind='scatter',cmap='viridis')
+
+gdf.plot(x='model_based_proxy',y='Ipast_two_arm_S2',kind='scatter')
