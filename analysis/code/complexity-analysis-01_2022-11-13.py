@@ -220,8 +220,8 @@ pd.plotting.scatter_matrix(gdf[two_arm_cols])
 # two_arm_seq28.rename(columns={'Trial':'trial_number'},inplace=True)
 sdf['state1_choice_optim'] = np.nan
 for tt in sdf.trial_number[sdf['task']=='two_arm'].unique():
-    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq24')] = two_arm_seq24.loc[two_arm_seq24['Trial']==tt,'S0_A_star'].to_numpy()
-    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq28')] = two_arm_seq28.loc[two_arm_seq28['Trial']==tt,'S0_A_star'].to_numpy()
+    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq24')] = int(two_arm_seq24.loc[two_arm_seq24['Trial']==tt,'S0_A_star'])
+    sdf.state1_choice_optim[(sdf['trial_number']==tt) & (sdf['block_label']=='seq28')] = int(two_arm_seq28.loc[two_arm_seq28['Trial']==tt,'S0_A_star'])
 
 Ipast_beads_block1 = []
 Ipast_beads_block2 = []
@@ -446,3 +446,14 @@ gdf.plot(x='Ipast_two_arm',y='two_arm_total_score',c='model_based_proxy',kind='s
 gdf.plot(x='Ipast_two_arm_rank',y='two_arm_total_score',c='model_based_proxy',kind='scatter',cmap='viridis')
 
 gdf.plot(x='model_based_proxy',y='Ipast_two_arm_S2',kind='scatter')
+
+#%%
+import statsmodels.api as sm
+
+fig = sm.qqplot(gdf['Ipast_two_arm'], line='45')
+plt.savefig(figdir + 'group_Ipast_two_arm_QQplot.png',dpi=150)
+
+fig = sm.qqplot(gdf['Ipast_beads'], line='45')
+plt.savefig(figdir + 'group_Ipast_beads_QQplot.png',dpi=150)
+
+#%%
